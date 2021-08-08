@@ -1,0 +1,4903 @@
+ 3/1: df.info()
+ 3/2: len(df)
+ 3/3: df = pd.read_csv("all_rakuma.csv")
+ 3/4:
+import pandas as pd
+from collections import Counter
+import string
+import jctconv
+import emoji
+import re
+ 3/5: df.head()
+ 3/6:
+import pandas as pd
+from collections import Counter
+import string
+import jctconv
+import emoji
+import re
+ 3/7:
+import pandas as pd
+from collections import Counter
+import string
+import jctconv
+import emoji
+import re
+ 4/1:
+import pandas as pd
+from collections import Counter
+import string
+import jctconv
+import emoji
+import re
+ 4/2:
+import pandas as pd
+from collections import Counter
+import string
+import jctconv
+import emoji
+import re
+ 4/3:
+import pandas as pd
+from collections import Counter
+import string
+import jctconv
+import emoji
+import re
+ 4/4:
+import pandas as pd
+from collections import Counter
+import string
+import jctconv
+import emoji
+import re
+ 4/5:
+import pandas as pd
+from collections import Counter
+import string
+import jctconv
+import emoji
+import re
+ 4/6: ls
+ 4/7:
+import pandas as pd
+from collections import Counter
+import string
+import jctconv
+import emoji
+import re
+ 4/8: ls
+ 4/9:
+import pandas as pd
+from collections import Counter
+import string
+import jctconv
+import emoji
+import re
+4/10:
+import pandas as pd
+from collections import Counter
+import string
+import jctconv
+import emoji
+import re
+4/11: df.head()
+4/12: df = pd.read_csv("all_rakuma.csv")
+4/13: df.head()
+4/14: df.info()
+4/15: len(df)
+4/16: df.category.value_counts()
+4/17: df.category.value_counts().reset_index()
+4/18: ctg_df = df.category.value_counts().reset_index()
+4/19: ctg_df = df.category.value_counts().reset_index()
+4/20: over1000_data = ctg_df[ctg_df.category > 1000]
+4/21: df.category.nunique()
+4/22: ctg_df = df.category.value_counts().reset_index()
+4/23: over1000_data = ctg_df[ctg_df.category > 1000]
+4/24: df.category.value_counts().reset_index()
+4/25: ctg_df = df.category.value_counts().reset_index()
+4/26: over1000_data = ctg_df[ctg_df.category > 1000]
+4/27: over1000_data.category.sum()
+4/28: data = df.merge(over1000_data[["index"]], left_on="category", right_on="index")
+4/29: data.category.nunique()
+4/30: emojis = "".join(emoji.UNICODE_EMOJI.keys())
+4/31: data = df.merge(over1000_data[["index"]], left_on="category", right_on="index")
+4/32: data.category.nunique()
+4/33: df.merge(over1000_data[["index"]], left_on="category", right_on="index")
+4/34: data=df.merge(over1000_data[["index"]], left_on="category", right_on="index")
+4/35: data.category.value_counts()
+4/36: emojis = "".join(emoji.UNICODE_EMOJI.keys())
+4/37: puncs = string.punctuation + "◆▼★②●☆■★【】『』「」、♪"
+4/38:
+def han2zen(txt):
+    txt = jctconv.h2z(txt, kana=True, digit=False, ascii=False)
+    return jctconv.z2h(txt, kana=False, digit=True, ascii=True)
+
+def remove_signs(txt):
+    rm_signs = emojis + puncs
+    for s in rm_signs:
+        txt = txt.replace(s, " ")
+    return txt
+
+def clean_txt(txt):
+    txt = han2zen(txt)
+    txt = remove_signs(txt)
+    txt_list = txt.upper().split()
+    txt_list = [x for x in txt_list if len(x) > 1 and re.search(r"[亜-熙ぁ-んァ-ヶa-zA-Z]", x)]
+    return " ".join(list(Counter(txt_list)))
+4/39: emojis = "".join(emoji.UNICODE_EMOJI.keys())
+4/40: puncs = string.punctuation + "◆▼★②●☆■★【】『』「」、♪"
+4/41:
+def han2zen(txt):
+    txt = jctconv.h2z(txt, kana=True, digit=False, ascii=False)
+    return jctconv.z2h(txt, kana=False, digit=True, ascii=True)
+
+def remove_signs(txt):
+    rm_signs = emojis + puncs
+    for s in rm_signs:
+        txt = txt.replace(s, " ")
+    return txt
+
+def clean_txt(txt):
+    txt = han2zen(txt)
+    txt = remove_signs(txt)
+    txt_list = txt.upper().split()
+    txt_list = [x for x in txt_list if len(x) > 1 and re.search(r"[亜-熙ぁ-んァ-ヶa-zA-Z]", x)]
+    return " ".join(list(Counter(txt_list)))
+4/42: data.title
+4/43: data["clean_title"] = data.title.apply(clean_txt)
+4/44: X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
+4/45: data["clean_title"] = data.title.apply(clean_txt)
+4/46:
+# sklearn
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import classification_report
+from sklearn.model_selection import train_test_split
+
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.naive_bayes import MultinomialNB
+4/47:
+category2idx = {c: idx for idx, c in enumerate(data.category.unique())}
+idx2category = {idx: c for idx, c in enumerate(data.category.unique())}
+4/48:
+X = data.clean_title
+y = data.category.apply(lambda x: category2idx[x])
+4/49: X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
+4/50:
+pipeline = Pipeline([
+    ("bow", CountVectorizer()),
+    ("tfidf", TfidfTransformer()),
+    ("classifier", RandomForestClassifier())
+])
+4/51: pipeline.fit(X_train, y_train)
+4/52: pred = pipeline.predict(X_test)
+4/53:
+# RandomForestClassifier
+print(classification_report(y_test, pred))
+4/54:
+# MultinomialNB
+print(classification_report(y_test, pred))
+4/55:
+# MultinomialNB
+print(classification_report(y_test, pred))
+4/56: pred
+4/57: X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
+4/58:
+pipeline = Pipeline([
+    ("bow", CountVectorizer()),
+    ("tfidf", TfidfTransformer()),
+    ("classifier", RandomForestClassifier())
+])
+4/59: pipeline.fit(X_train, y_train)
+ 5/1:
+import pandas as pd
+from collections import Counter
+import string
+import jctconv
+import emoji
+import re
+ 5/2: df = pd.read_csv("all_rakuma.csv")
+ 5/3: df.head()
+ 5/4: len(df)
+ 5/5: df.category.value_counts().reset_index()
+ 5/6: df.category.nunique()
+ 5/7: ctg_df = df.category.value_counts().reset_index()
+ 5/8: over1000_data = ctg_df[ctg_df.category > 1000]
+ 5/9: over1000_data.category.sum()
+5/10: over1000_data[["index"]]
+5/11: data.category.nunique()
+5/12: data=df.merge(over1000_data[["index"]], left_on="category", right_on="index")
+5/13: data.category.value_counts()
+5/14: emojis = "".join(emoji.UNICODE_EMOJI.keys())
+5/15: puncs = string.punctuation + "◆▼★②●☆■★【】『』「」、♪"
+5/16:
+def han2zen(txt):
+    txt = jctconv.h2z(txt, kana=True, digit=False, ascii=False)
+    return jctconv.z2h(txt, kana=False, digit=True, ascii=True)
+
+def remove_signs(txt):
+    rm_signs = emojis + puncs
+    for s in rm_signs:
+        txt = txt.replace(s, " ")
+    return txt
+
+def clean_txt(txt):
+    txt = han2zen(txt)
+    txt = remove_signs(txt)
+    txt_list = txt.upper().split()
+    txt_list = [x for x in txt_list if len(x) > 1 and re.search(r"[亜-熙ぁ-んァ-ヶa-zA-Z]", x)]
+    return " ".join(list(Counter(txt_list)))
+5/17: data.title
+5/18: data["clean_title"] = data.title.apply(clean_txt)
+5/19:
+# sklearn
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import classification_report
+from sklearn.model_selection import train_test_split
+
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.naive_bayes import MultinomialNB
+5/20:
+category2idx = {c: idx for idx, c in enumerate(data.category.unique())}
+idx2category = {idx: c for idx, c in enumerate(data.category.unique())}
+5/21:
+X = data.clean_title
+y = data.category.apply(lambda x: category2idx[x])
+5/22: X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
+5/23:
+pipeline = Pipeline([
+    ("bow", CountVectorizer()),
+    ("tfidf", TfidfTransformer()),
+    ("classifier", RandomForestClassifier())
+])
+5/24: pipeline.fit(X_train, y_train)
+5/25: pipeline.fit(X_train, y_train)
+5/26: pred = pipeline.predict(X_test)
+5/27: print(pred)
+5/28:
+pipeline = Pipeline([
+    ("bow", CountVectorizer()),
+    ("tfidf", TfidfTransformer()),
+    ("classifier", RandomForestClassifier())
+])
+5/29: pipeline.fit(X_train, y_train)
+5/30: pred = pipeline.predict(X_test)
+5/31: print(pred)
+5/32:
+# RandomForestClassifier
+print(classification_report(y_test, pred))
+5/33: idx2category[17]
+5/34:
+# MultinomialNB
+print(classification_report(y_test, pred))
+5/35:
+# target = ["NIKE AIR FORCE 1 LOW QS PUERTO RICO 2020"]
+target = ["ニューバランス Cross Country 25.5cm M320"]
+target = ["✨新品✨オニツカタイガー ❇️25.0cm"]
+target = ["ビームス　ナイキ　REACT PRESTO DHARMA"]
+prediction = pipeline.predict(target)
+5/36: idx2category
+5/37:
+
+idx2category[prediction[0]]
+5/38: import pickle
+5/39:
+with open("rdmf.pickle", mode="wb") as f:
+    pickle.dump(pipeline, f)
+5/40:
+with open("rdmf.pickle", mode="rb") as ff:
+    model = pickle.load(ff)
+5/41: model.predict(target)
+5/42:
+pd.DataFrame([
+    {"k": k, "v": v}
+    for k, v in idx2category.items()
+]).to_csv("idx2category.csv", index=False)
+5/43: ls
+ 7/1: print("dsp")
+ 8/1: print("dsp")
+ 8/2:
+import numpy as np
+import pandas as  pd
+import matplotlib.pyplot as plt
+import  statsmodels.api as sm
+import seaborn
+seaborn.set()
+ 8/3: data = pd.read_csv("1.02. Multiple linear regression.csv")
+ 8/4: data
+ 8/5: print(data)
+ 8/6: data
+ 8/7: data.describe()
+ 8/8:
+y = data['GPA']
+x1 = data[['SAT','Rand 1,2,3']]
+ 8/9:
+x = sm.add_constant(x1)
+results = sm.OLS(y,x).fit()
+8/10: results.summary()
+ 9/1: data = pd.read_csv('1.03. Dummies.csv')
+ 9/2:
+import numpy as np
+import pandas as  pd
+import matplotlib.pyplot as plt
+import  statsmodels.api as sm
+import seaborn
+seaborn.set()
+ 9/3: data = pd.read_csv("1.02. Multiple linear regression.csv")
+ 9/4: data
+ 9/5: data.describe()
+ 9/6:
+y = data['GPA']
+x1 = data[['SAT','Rand 1,2,3']]
+ 9/7:
+x = sm.add_constant(x1)
+results = sm.OLS(y,x).fit()
+ 9/8: results.summary()
+ 9/9: data = pd.read_csv('1.03. Dummies.csv')
+9/10: data
+9/11: data['Attendance']=data['Attendance'].map({'Yes':1,'No',0})
+9/12: data['Attendance']=data['Attendance'].map({'Yes':1,'No':0})
+9/13: data
+9/14: data.describe()
+9/15:
+y = data['GPA']
+x1 = data[['SAT','Attendance']]
+9/16:
+x = sm.add_constant(x1)
+results = sm.OLS(y,x).fit()
+results.summary()
+9/17:
+x = sm.add_constant(x1)
+results = sm.OLS(y,x).fit()
+results.summary()
+print(x)
+9/18:
+y = data['GPA']
+x1 = data[['SAT','Attendance']]
+9/19:
+x = sm.add_constant(x1)
+results = sm.OLS(y,x).fit()
+results.summary()
+9/20: print(x)
+9/21:
+test_data = pd.DataFrame({'const': 1, 'SAT':[1700,1670],'Attendance':[0,1]})
+test_data
+9/22:
+predictions = results.predict(test_data)
+predictions
+9/23: from sklearn.linear_model import LinearRegression
+9/24:
+data = pd.read_csv('1.01.Simple-linear-regression.csv')
+data
+9/25:
+x = data['SAT']
+y = data['GPA']
+x.shape
+y.shape
+9/26:
+reg = LinearRegression()
+reg.fit(x,y)
+9/27:
+x = x.values.reshape(-1,1)
+x.shape
+9/28:
+reg = LinearRegression()
+reg.fit(x,y)
+9/29:
+x = data['SAT']
+y = data['GPA']
+x.shape
+y.shape
+9/30:
+x_matrix = x.values.reshape(-1,1)
+x_matrix.shape
+9/31:
+reg = LinearRegression()
+reg.fit(x_matrix,y)
+9/32:
+x = data['SAT']
+y = data['GPA']
+x.shape
+y.shape
+9/33:
+x = x.values.reshape(-1,1)
+x.shape
+9/34:
+reg = LinearRegression()
+reg.fit(x,y)
+9/35:
+# R値
+reg.score(x,y)
+9/36: reg.coef_
+9/37: reg.predict(1740)
+9/38:
+# R値,モデルの説明力
+reg.score(x,y)
+9/39:
+# 相関係数
+reg.coef_
+9/40: reg.predict(1740)
+9/41:
+x = data['SAT']
+y = data['GPA']
+x.shape
+y.shape
+9/42:
+x = x.values.reshape(-1,1)
+x.shape
+9/43:
+reg = LinearRegression()
+reg.fit(x,y)
+9/44:
+# R値,モデルの説明力
+reg.score(x,y)
+9/45:
+# 相関係数
+reg.coef_
+9/46: reg.predict(1740)
+9/47: reg.predict(array=1740)
+9/48: reg.predict(nd.array(1740))
+9/49: reg.predict(np.array(1740))
+9/50: reg.predict(array([1740]))
+9/51: reg.predict(174)
+9/52: reg.predict((174).reshape(1,-1))
+9/53: reg.predict(np.array(174).reshape(1,-1))
+9/54: reg.predict(np.array(1740).reshape(1,-1))
+9/55:
+test_data = pd.DataFrame(data=[1740,1760],columns=['SAT'])
+test_data
+9/56:
+test_data = pd.DataFrame(data=[1740,1760],columns=['SAT'])
+test_data
+9/57:
+test_data['kigaku_GPA']=reg.predict(test_data)
+test_data
+9/58:
+data = pd.read_csv('1.02. Multiple linear regression.csv')
+data.head()
+9/59:
+data = pd.read_csv('1.02. Multiple linear regression.csv')
+data.head()
+9/60:
+x = data[['SAT','Rand 1,2,3']]
+y = data['GPA']
+9/61: reg.fit(x,y)
+9/62:
+# 決定係数
+reg.score(x,y)
+9/63:
+# 特徴選択
+from sklearn.feature_selection import f_regression
+f_regression(x,y)
+9/64:
+# 標準化
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+scaler.fit(x)
+9/65:
+x_scaled = scaler.transform(x)
+x_scaled
+9/66: reg.fit(x_scaled,y)
+9/67: reg.coef_
+9/68:
+reg_summary = pd.DataFrame([['Intercept'],['SAT'],['Rand 1,2,3']],columns=['Features'])
+reg_summary['Weights'] = reg.intercept_,reg.coef_[0],reg.coef_[1]
+reg_summary
+9/69:
+#Random1,2,3を除く
+x_simple_matrix = x_scaled[:0].reshape(-1,1)
+reg.fit(x_simple_matrix,y)
+9/70:
+#Random1,2,3を除く
+x_simple_matrix = x_scaled[:,0].reshape(-1,1)
+reg.fit(x_simple_matrix,y)
+9/71: reg.coef_
+10/1:
+from sklearn.model_selection import train_test_split
+a = np.arrange(1,101)
+b = np.arrange(501,601)
+10/2:
+import numpy as np
+import pandas as  pd
+import matplotlib.pyplot as plt
+import  statsmodels.api as sm
+import seaborn
+seaborn.set()
+10/3: data = pd.read_csv("1.02. Multiple linear regression.csv")
+10/4: data
+10/5: data.describe()
+10/6:
+y = data['GPA']
+x1 = data[['SAT','Rand 1,2,3']]
+10/7:
+x = sm.add_constant(x1)
+results = sm.OLS(y,x).fit()
+10/8: results.summary()
+10/9: data = pd.read_csv('1.03. Dummies.csv')
+10/10: data
+10/11: data['Attendance']=data['Attendance'].map({'Yes':1,'No':0})
+10/12: data
+10/13: data.describe()
+10/14:
+y = data['GPA']
+x1 = data[['SAT','Attendance']]
+10/15:
+x = sm.add_constant(x1)
+results = sm.OLS(y,x).fit()
+results.summary()
+10/16:
+test_data = pd.DataFrame({'const': 1, 'SAT':[1700,1670],'Attendance':[0,1]})
+test_data
+10/17:
+predictions = results.predict(test_data)
+predictions
+10/18: from sklearn.linear_model import LinearRegression
+10/19:
+data = pd.read_csv('1.01.Simple-linear-regression.csv')
+data
+10/20:
+x = data['SAT']
+y = data['GPA']
+x.shape
+y.shape
+10/21:
+x = x.values.reshape(-1,1)
+x.shape
+10/22:
+reg = LinearRegression()
+reg.fit(x,y)
+10/23:
+# R値,モデルの説明力
+reg.score(x,y)
+10/24:
+# 相関係数
+reg.coef_
+10/25: reg.predict(np.array(1740).reshape(1,-1))
+10/26:
+test_data = pd.DataFrame(data=[1740,1760],columns=['SAT'])
+test_data
+10/27:
+test_data['kigaku_GPA']=reg.predict(test_data)
+test_data
+10/28:
+data = pd.read_csv('1.02. Multiple linear regression.csv')
+data.head()
+10/29:
+x = data[['SAT','Rand 1,2,3']]
+y = data['GPA']
+10/30:
+# LinearRegressionは重回帰前提なのでreshapeする必要なし
+reg.fit(x,y)
+10/31:
+# 決定係数ここではR2乗値自由度修正済み(どうでもいい値が入っていることを考慮して正しい説明力を示している値)にはならない。
+#自由度修正済みの方が小さくなれば一つ以上の変数は全く当てにならないことを示す。
+
+reg.score(x,y)
+10/32:
+# 特徴選択
+from sklearn.feature_selection import f_regression
+f_regression(x,y)
+#右がF値, 左がP値
+# 一つ一つが意味あるかないかはわかるが、相互作用は考慮していない。考慮するならlinearlegressionを使う
+10/33:
+# 標準化
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+scaler.fit(x)
+10/34:
+x_scaled = scaler.transform(x)
+x_scaled
+10/35: reg.fit(x_scaled,y)
+10/36: reg.coef_
+10/37:
+# この回帰による結果をデータフレーム型で表示,Biasは切片
+reg_summary = pd.DataFrame([['Bias'],['SAT'],['Rand 1,2,3']],columns=['Features'])
+reg_summary['Weights'] = reg.intercept_,reg.coef_[0],reg.coef_[1]
+reg_summary
+10/38:
+#Random1,2,3を除く
+x_simple_matrix = x_scaled[:,0].reshape(-1,1)
+reg.fit(x_simple_matrix,y)
+10/39: reg.coef_
+10/40:
+from sklearn.model_selection import train_test_split
+a = np.arrange(1,101)
+b = np.arrange(501,601)
+10/41:
+a_train, a_test = train_test_split(a)
+a_train.shape
+10/42:
+from sklearn.model_selection import train_test_split
+a = np.arrange(1,101)
+b = np.arrange(501,601)
+10/43:
+from sklearn.model_selection import train_test_split
+a = np.arange(1,101)
+b = np.arange(501,601)
+10/44:
+a_train, a_test = train_test_split(a)
+a_train.shape
+10/45:
+a_train, a_test = train_test_split(a,test_size = 0.2)
+a_train.shape
+10/46:
+a_train, a_test = train_test_split(a,test_size = 0.2,shuffle=False)
+a_train.shape
+10/47:
+a_train, a_test = train_test_split(a,test_size = 0.2)
+a_train.shape
+10/48:
+a_train, a_test = train_test_split(a,test_size = 0.2,random_state=42)
+a_train.shape
+10/49:
+a_train, a_test, b_train, b_test = train_test_split(a,b,test_size = 0.2,random_state=42)
+# random_stateに入れるとずっと変わらない
+a_train.shape
+11/1:
+import numpy as np
+import pandas as  pd
+import matplotlib.pyplot as plt
+import  statsmodels.api as sm
+import seaborn
+seaborn.set()
+11/2:
+data = pd.read_csv("1.04. Real-life example.csv")
+data
+11/3: data.describe(include='all')
+11/4:
+raw_data = pd.read_csv("1.04. Real-life example.csv")
+raw_data
+11/5:
+raw_data.describe(include='all')
+# n数が違うことに注意せよ
+11/6: data = raw_data.drop(['Model'],axis = 1)
+11/7:
+data = raw_data.drop(['Model'],axis = 1)
+data.describe()
+11/8:
+data = raw_data.drop(['Model'],axis = 1)
+data.describe(include='all')
+11/9:
+data.isnull().sum()
+# 5%以下なら削除しても問題なし。
+data_no_mv = data.dropna(axis = 0)
+data_no_mv.describe(include='all')
+12/1: sns.displot(data_no_mv['Price'])
+12/2:
+import seaborn as sns
+sns.displot(data_no_mv['Price'])
+12/3:
+import numpy as np
+import pandas as  pd
+import matplotlib.pyplot as plt
+import  statsmodels.api as sm
+import seaborn
+seaborn.set()
+12/4:
+raw_data = pd.read_csv("1.04. Real-life example.csv")
+raw_data
+12/5:
+raw_data.describe(include='all')
+# n数が違うことに注意せよ
+12/6:
+data = raw_data.drop(['Model'],axis = 1)
+data.describe(include='all')
+12/7:
+data.isnull().sum()
+# 5%以下なら削除しても問題なし。
+data_no_mv = data.dropna(axis = 0)
+data_no_mv.describe(include='all')
+12/8:
+import seaborn as sns
+sns.displot(data_no_mv['Price'])
+12/9:
+q = data_no_mv['Price'].quantile(0.99)
+q
+12/10:
+q = data_no_mv['Price'].quantile(0.99)
+data_1 = data_no_mv[data_no_mv['Price']<q]
+data_1.describe(include='all')
+12/11:
+data2 = data1[data_1['EngineV']<6.5]
+sns.displot(data_2['EngineV'])
+12/12:
+data2 = data_1[data_1['EngineV']<6.5]
+sns.displot(data_2['EngineV'])
+12/13:
+data_2 = data_1[data_1['EngineV']<6.5]
+sns.displot(data_2['EngineV'])
+12/14:
+q = data_2['Year'].quantile(0.99)
+data_3 = data_2[data_2['Year']>q]
+sns.displot(data_3['Year'])
+12/15:
+data_2 = data_1[data_1['EngineV']<6.5]
+sns.displot(data_2['EngineV'])
+12/16:
+q = data_2['Year'].quantile(0.99)
+data_3 = data_2[data_2['Year']<q]
+sns.displot(data_3['Year'])
+12/17:
+q = data_2['Year'].quantile(0.01)
+data_3 = data_2[data_2['Year']>q]
+sns.displot(data_3['Year'])
+12/18:
+data_cleaned = data_4.reset_index(drop=true)
+data_cleaned.describe(include='all')
+12/19:
+data_cleaned = data_3.reset_index(drop=true)
+data_cleaned.describe(include='all')
+12/20:
+data_cleaned = data_3.reset_index(drop=True)
+data_cleaned.describe(include='all')
+12/21:
+q = data_2['Year'].quantile(0.01)
+data_3 = data_2[data_2['Year']>q]
+sns.distplot(data_3['Year'])
+12/22:
+data_2 = data_1[data_1['EngineV']<6.5]
+sns.distplot(data_2['EngineV'])
+13/1:
+f, (ax1,ax2,ax3)=plt.subplots(1,3,sharey=True,figsize=(15,3))
+ax1.scatter(data_cleaned['Year'],data_cleaned['Price'])
+ax1.set_title('Price and Year')
+plt.show()
+13/2:
+import numpy as np
+import pandas as  pd
+import matplotlib.pyplot as plt
+import  statsmodels.api as sm
+import seaborn
+seaborn.set()
+13/3:
+raw_data = pd.read_csv("1.04. Real-life example.csv")
+raw_data
+13/4:
+raw_data.describe(include='all')
+# n数が違うことに注意せよ
+13/5:
+data = raw_data.drop(['Model'],axis = 1)
+data.describe(include='all')
+13/6:
+data.isnull().sum()
+# 5%以下なら削除しても問題なし。
+data_no_mv = data.dropna(axis = 0)
+data_no_mv.describe(include='all')
+13/7:
+import seaborn as sns
+sns.displot(data_no_mv['Price'])
+# このままだと上位1%の結果に回帰直線がだいぶ影響を受けてしまう
+13/8:
+# 線形回帰は外れ値に影響されるので上位１％を削除
+q = data_no_mv['Price'].quantile(0.99)
+data_1 = data_no_mv[data_no_mv['Price']<q]
+data_1.describe(include='all')
+13/9:
+data_2 = data_1[data_1['EngineV']<6.5]
+sns.distplot(data_2['EngineV'])
+13/10:
+q = data_2['Year'].quantile(0.01)
+data_3 = data_2[data_2['Year']>q]
+sns.distplot(data_3['Year'])
+13/11:
+# index番号の振りなおし
+data_cleaned = data_3.reset_index(drop=True)
+data_cleaned.describe(include='all')
+13/12:
+f, (ax1,ax2,ax3)=plt.subplots(1,3,sharey=True,figsize=(15,3))
+ax1.scatter(data_cleaned['Year'],data_cleaned['Price'])
+ax1.set_title('Price and Year')
+plt.show()
+13/13:
+log_price = np.log(data_cleaned['Price'])
+data_cleaned['log_price']=log_price
+data_cleaned
+13/14:
+f, (ax1,ax2,ax3)=plt.subplots(1,3,sharey=True,figsize=(15,3))
+ax1.scatter(data_cleaned['Year'],data_cleaned['log_price'])
+ax1.set_title('Price and Year')
+plt.show()
+13/15:
+# 多重共線性(連動している値)の確認
+from statsmodels.stats.outliers_influence import variance_infration_factor
+variables = data_cleaned[['Mileage','Year','EngineV']]
+vif = pd.DataFrame()
+vif['VIF']=[variance_infration_factor(variables.values,i) for i in range(variables.shape[1])]
+vif['features']=variables.columns
+13/16:
+# 多重共線性(連動している値)の確認
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+variables = data_cleaned[['Mileage','Year','EngineV']]
+vif = pd.DataFrame()
+vif['VIF']=[variance_inflation_factor(variables.values,i) for i in range(variables.shape[1])]
+vif['features']=variables.columns
+13/17:
+# 多重共線性(連動している値)の確認
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+variables = data_cleaned[['Mileage','Year','EngineV']]
+vif = pd.DataFrame()
+vif['VIF']=[variance_inflation_factor(variables.values,i) for i in range(variables.shape[1])]
+vif['features']=variables.columns
+vif
+13/18: data_no_multicollinearity = data_cleaned.drop[['Year'],axis=1]
+13/19: data_no_multicollinearity = data_cleaned.drop(['Year'],axis=1)
+13/20:
+# 多重共線性(連動している値)の確認
+data_cleaned = data_cleaned.drop(['Price'],axis=1)
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+variables = data_cleaned[['Mileage','Year','EngineV']]
+vif = pd.DataFrame()
+vif['VIF']=[variance_inflation_factor(variables.values,i) for i in range(variables.shape[1])]
+vif['features']=variables.columns
+vif
+# 1ならなし、1~5なら問題なし、5以上なら多重共線性あり
+13/21: data_no_multicollinearity = data_cleaned.drop(['Year'],axis=1)
+13/22:
+data_no_multicollinearity = data_cleaned.drop(['Year'],axis=1)
+data_no_multicollinearity
+14/1:
+# ダミーの数はnこのデータに関してn-1こ。
+data_with_dummies = pd.get_dummies(data_no_multicollinearity,drop_first = True)
+data_with_dummies
+14/2:
+import numpy as np
+import pandas as  pd
+import matplotlib.pyplot as plt
+import  statsmodels.api as sm
+import seaborn
+seaborn.set()
+14/3:
+raw_data = pd.read_csv("1.04. Real-life example.csv")
+raw_data
+14/4:
+raw_data.describe(include='all')
+# n数が違うことに注意せよ
+14/5:
+data = raw_data.drop(['Model'],axis = 1)
+data.describe(include='all')
+14/6:
+data.isnull().sum()
+# 5%以下なら削除しても問題なし。
+data_no_mv = data.dropna(axis = 0)
+data_no_mv.describe(include='all')
+14/7:
+import seaborn as sns
+sns.displot(data_no_mv['Price'])
+# このままだと上位1%の結果に回帰直線がだいぶ影響を受けてしまう
+14/8:
+# 線形回帰は外れ値に影響されるので上位１％を削除
+q = data_no_mv['Price'].quantile(0.99)
+data_1 = data_no_mv[data_no_mv['Price']<q]
+data_1.describe(include='all')
+14/9:
+data_2 = data_1[data_1['EngineV']<6.5]
+sns.distplot(data_2['EngineV'])
+14/10:
+q = data_2['Year'].quantile(0.01)
+data_3 = data_2[data_2['Year']>q]
+sns.distplot(data_3['Year'])
+14/11:
+# index番号の振りなおし
+data_cleaned = data_3.reset_index(drop=True)
+data_cleaned.describe(include='all')
+14/12:
+f, (ax1,ax2,ax3)=plt.subplots(1,3,sharey=True,figsize=(15,3))
+ax1.scatter(data_cleaned['Year'],data_cleaned['Price'])
+ax1.set_title('Price and Year')
+plt.show()
+14/13:
+log_price = np.log(data_cleaned['Price'])
+data_cleaned['log_price']=log_price
+data_cleaned
+# メモ:基本的にデータはarray型で入っている。price:[hoge,fuga,piyp,....]って感じ
+14/14:
+f, (ax1,ax2,ax3)=plt.subplots(1,3,sharey=True,figsize=(15,3))
+ax1.scatter(data_cleaned['Year'],data_cleaned['log_price'])
+ax1.set_title('Price and Year')
+plt.show()
+14/15:
+# 多重共線性(連動している値)の確認
+data_cleaned = data_cleaned.drop(['Price'],axis=1)
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+variables = data_cleaned[['Mileage','Year','EngineV']]
+vif = pd.DataFrame()
+vif['VIF']=[variance_inflation_factor(variables.values,i) for i in range(variables.shape[1])]
+vif['features']=variables.columns
+vif
+# 1ならなし、1~5なら問題なし、5以上なら多重共線性あり
+14/16:
+data_no_multicollinearity = data_cleaned.drop(['Year'],axis=1)
+data_no_multicollinearity
+14/17:
+# ダミーの数はnこのデータに関してn-1こ。
+data_with_dummies = pd.get_dummies(data_no_multicollinearity,drop_first = True)
+data_with_dummies
+14/18: data_with_dummies.columns.values
+14/19: data_preprocessed = data_with_dummies[cols]
+14/20:
+data_with_dummies.columns.values
+上記コードでカラムの名前を全確認、その後手動で並び替えて適用。
+cols = [ 'log_price', 'Mileage', 'EngineV', 'Brand_BMW',
+       'Brand_Mercedes-Benz', 'Brand_Mitsubishi', 'Brand_Renault',
+       'Brand_Toyota', 'Brand_Volkswagen', 'Body_hatch', 'Body_other',
+       'Body_sedan', 'Body_vagon', 'Body_van', 'Engine Type_Gas',
+       'Engine Type_Other', 'Engine Type_Petrol', 'Registration_yes']
+14/21:
+data_with_dummies.columns.values
+# 上記コードでカラムの名前を全確認、その後手動で並び替えて適用。
+cols = [ 'log_price', 'Mileage', 'EngineV', 'Brand_BMW',
+       'Brand_Mercedes-Benz', 'Brand_Mitsubishi', 'Brand_Renault',
+       'Brand_Toyota', 'Brand_Volkswagen', 'Body_hatch', 'Body_other',
+       'Body_sedan', 'Body_vagon', 'Body_van', 'Engine Type_Gas',
+       'Engine Type_Other', 'Engine Type_Petrol', 'Registration_yes']
+14/22: data_preprocessed = data_with_dummies[cols]
+14/23:
+targets = data_preprocessed['log_price']
+inputs = data_preprocessed.drop(['log_price', axis = 1])
+14/24:
+targets = data_preprocessed['log_price']
+inputs = data_preprocessed.drop(['log_price'], axis = 1)
+14/25:
+# 標準化
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+scaler.fit(inputs)
+inputs_scaled = scaler.transform(inputs)
+14/26:
+from sklearn.model_selection import train_test_split
+x_train, x_test, y_train, y_test = train_test_split(input_scaled, targets, test_size = 0.2, random_state = 365)
+14/27:
+from sklearn.model_selection import train_test_split
+x_train, x_test, y_train, y_test = train_test_split(inputs_scaled, targets, test_size = 0.2, random_state = 365)
+14/28:
+reg = LinearRegression()
+reg.fit(x_train, y_train)
+y_hat = reg.predict(x_train)
+plt.scatter(y_train, y_hat)
+plt.show()
+14/29:
+# 標準化
+from sklearn.preprocessing import StandardScaler
+from sklearn import LinearRegression
+scaler = StandardScaler()
+scaler.fit(inputs)
+inputs_scaled = scaler.transform(inputs)
+14/30:
+# 標準化
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression
+scaler = StandardScaler()
+scaler.fit(inputs)
+inputs_scaled = scaler.transform(inputs)
+14/31:
+from sklearn.model_selection import train_test_split
+x_train, x_test, y_train, y_test = train_test_split(inputs_scaled, targets, test_size = 0.2, random_state = 365)
+14/32:
+reg = LinearRegression()
+reg.fit(x_train, y_train)
+y_hat = reg.predict(x_train)
+plt.scatter(y_train, y_hat)
+plt.show()
+14/33:
+# 残差のプロット
+sns.distplot(y_train - y_hat)
+14/34: reg.score(x_train,y_train)
+14/35:
+# 各変数と重みをまとめた表
+reg_summary = pd.DataFrame(inputs.columns.values,columns = ['Features'])
+reg_summary['Weights']= reg.coef_
+reg_summary
+15/1:
+import numpy as np
+import pandas as  pd
+import matplotlib.pyplot as plt
+import  statsmodels.api as sm
+import seaborn
+seaborn.set()
+15/2:
+raw_data = pd.read_csv("1.04. Real-life example.csv")
+raw_data
+15/3:
+raw_data.describe(include='all')
+# n数が違うことに注意せよ
+15/4:
+data = raw_data.drop(['Model'],axis = 1)
+data.describe(include='all')
+15/5:
+data.isnull().sum()
+# 5%以下なら削除しても問題なし。
+data_no_mv = data.dropna(axis = 0)
+data_no_mv.describe(include='all')
+15/6:
+import seaborn as sns
+sns.displot(data_no_mv['Price'])
+# このままだと上位1%の結果に回帰直線がだいぶ影響を受けてしまう
+15/7:
+# 線形回帰は外れ値に影響されるので上位１％を削除
+q = data_no_mv['Price'].quantile(0.99)
+data_1 = data_no_mv[data_no_mv['Price']<q]
+data_1.describe(include='all')
+15/8:
+data_2 = data_1[data_1['EngineV']<6.5]
+sns.distplot(data_2['EngineV'])
+15/9:
+q = data_2['Year'].quantile(0.01)
+data_3 = data_2[data_2['Year']>q]
+sns.distplot(data_3['Year'])
+15/10:
+# index番号の振りなおし
+data_cleaned = data_3.reset_index(drop=True)
+data_cleaned.describe(include='all')
+15/11:
+f, (ax1,ax2,ax3)=plt.subplots(1,3,sharey=True,figsize=(15,3))
+ax1.scatter(data_cleaned['Year'],data_cleaned['Price'])
+ax1.set_title('Price and Year')
+plt.show()
+15/12:
+log_price = np.log(data_cleaned['Price'])
+data_cleaned['log_price']=log_price
+data_cleaned
+# メモ:基本的にデータはarray型で入っている。price:[hoge,fuga,piyp,....]って感じ
+15/13:
+f, (ax1,ax2,ax3)=plt.subplots(1,3,sharey=True,figsize=(15,3))
+ax1.scatter(data_cleaned['Year'],data_cleaned['log_price'])
+ax1.set_title('Price and Year')
+plt.show()
+15/14:
+# 多重共線性(連動している値)の確認
+data_cleaned = data_cleaned.drop(['Price'],axis=1)
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+variables = data_cleaned[['Mileage','Year','EngineV']]
+vif = pd.DataFrame()
+vif['VIF']=[variance_inflation_factor(variables.values,i) for i in range(variables.shape[1])]
+vif['features']=variables.columns
+vif
+# 1ならなし、1~5なら問題なし、5以上なら多重共線性あり
+15/15:
+data_no_multicollinearity = data_cleaned.drop(['Year'],axis=1)
+data_no_multicollinearity
+15/16:
+# ダミーの数はnこのデータに関してn-1こ。
+data_with_dummies = pd.get_dummies(data_no_multicollinearity,drop_first = True)
+data_with_dummies
+15/17:
+data_with_dummies.columns.values
+# 上記コードでカラムの名前を全確認、その後手動で並び替えて適用。
+cols = [ 'log_price', 'Mileage', 'EngineV', 'Brand_BMW',
+       'Brand_Mercedes-Benz', 'Brand_Mitsubishi', 'Brand_Renault',
+       'Brand_Toyota', 'Brand_Volkswagen', 'Body_hatch', 'Body_other',
+       'Body_sedan', 'Body_vagon', 'Body_van', 'Engine Type_Gas',
+       'Engine Type_Other', 'Engine Type_Petrol', 'Registration_yes']
+15/18: data_preprocessed = data_with_dummies[cols]
+15/19:
+targets = data_preprocessed['log_price']
+inputs = data_preprocessed.drop(['log_price'], axis = 1)
+15/20:
+# 標準化
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression
+scaler = StandardScaler()
+scaler.fit(inputs)
+inputs_scaled = scaler.transform(inputs)
+15/21:
+from sklearn.model_selection import train_test_split
+x_train, x_test, y_train, y_test = train_test_split(inputs_scaled, targets, test_size = 0.2, random_state = 365)
+15/22:
+reg = LinearRegression()
+reg.fit(x_train, y_train)
+y_hat = reg.predict(x_train)
+plt.scatter(y_train, y_hat, alpha = 0.2)
+plt.show()
+15/23:
+# 残差のプロット
+sns.distplot(y_train - y_hat)
+15/24: reg.score(x_train,y_train)
+15/25:
+# 各変数と重みをまとめた表。プラスであるほど値段の上昇に寄与していることがわかる。
+reg_summary = pd.DataFrame(inputs.columns.values,columns = ['Features'])
+reg_summary['Weights']= reg.coef_
+reg_summary
+15/26:
+y_hat_test = reg.predict(x_test)
+df_pf = pd_DataFrame(y_hat_test,columns = ['Prediction'])
+df_pf
+15/27:
+y_hat_test = reg.predict(x_test)
+df_pf = pd.DataFrame(y_hat_test,columns = ['Prediction'])
+df_pf
+15/28:
+y_hat_test = reg.predict(x_test)
+df_pf = pd.DataFrame(np.exp(y_hat_test) ,columns = ['Prediction'])
+df_pf
+15/29:
+# テストデータと見比べる
+df_pf['Target'] = np.exp(y_test)
+df_pf
+15/30: y_test
+15/31:
+# y_testにはテストデータにする前のインデックスが振られており、同じインデックスと誤解しているためNaNだらけになっている。
+y_test = y_test.reset_index(drop=true)
+y_test
+15/32:
+# y_testにはテストデータにする前のインデックスが振られており、同じインデックスと誤解しているためNaNだらけになっている。
+y_test = y_test.reset_index(drop=True)
+y_test
+15/33:
+df_pf['Target']=np.exp(y_test)
+df_pf
+15/34:
+#誤差はどれくらいかを%で表す。
+df_pf['Residual']=df_pf['Target']-df_pf['Prediction']
+df_pf['Difference%']=np.absolute(df_pf['Residual']/df_pf['Target']*100)
+df_pf
+15/35: df_pf.describe()
+15/36:
+pd.options.display.max_rows = 999
+pd.set_option('display.float_format',lambda x: '%.2f' % x)
+df_pf.sort_values(by=['Difference%'])
+16/1:
+import numpy as np
+import pandas as pd 
+import statsmodels.api as sm
+import matplotlib.pyplot as plt 
+import seaborn as sns
+sns.set()
+16/2:
+raw_data = pd.read_csv('2.01. Admittance.csv')
+raw_data
+16/3:
+data = raw_data.copy()
+data['Admitted']= data['Admitted'].map({'Yes':1,'No':0})
+data
+16/4:
+y = data['Admitted']
+x1 = data['SAT']
+plt.scatter(x1,y,color = 'C0')
+plt.show()
+16/5:
+# ロジスティック回帰の実行
+reg_log = sm.Logit(y,x)
+results_log = reg_log.fit()
+def f(x,b0,b1):
+    return np.array(np.exp(b0+x*b1)/(1+np.exp(b0+x*b1)))
+
+f_sorted = np.sort(f(x1,results_log.params[0],results_log.params[1]))
+x_sorted = np.sort(np.array(x1))
+
+plt.scatter(x1,y,color='C0')
+plt.plot(x_sorted,f_sorted,color="C8")
+plt.show()
+16/6:
+# ロジスティック回帰の実行
+reg_log = sm.Logit(y,x1)
+results_log = reg_log.fit()
+def f(x,b0,b1):
+    return np.array(np.exp(b0+x*b1)/(1+np.exp(b0+x*b1)))
+
+f_sorted = np.sort(f(x1,results_log.params[0],results_log.params[1]))
+x_sorted = np.sort(np.array(x1))
+
+plt.scatter(x1,y,color='C0')
+plt.plot(x_sorted,f_sorted,color="C8")
+plt.show()
+16/7:
+# ロジスティック回帰の実行
+x = sm.add_constant(x1)
+reg_log = sm.Logit(y,x)
+results_log = reg_log.fit()
+def f(x,b0,b1):
+    return np.array(np.exp(b0+x*b1)/(1+np.exp(b0+x*b1)))
+
+f_sorted = np.sort(f(x1,results_log.params[0],results_log.params[1]))
+x_sorted = np.sort(np.array(x1))
+
+plt.scatter(x1,y,color='C0')
+plt.plot(x_sorted,f_sorted,color="C8")
+plt.show()
+16/8:
+# ロジスティック回帰の実行
+x = sm.add_constant(x1)
+reg_log = sm.Logit(y,x)
+results_log = reg_log.fit()
+results_log
+def f(x,b0,b1):
+    return np.array(np.exp(b0+x*b1)/(1+np.exp(b0+x*b1)))
+
+f_sorted = np.sort(f(x1,results_log.params[0],results_log.params[1]))
+x_sorted = np.sort(np.array(x1))
+
+plt.scatter(x1,y,color='C0')
+plt.plot(x_sorted,f_sorted,color="C8")
+plt.show()
+16/9: results_log
+16/10: results_log.params[0]
+16/11: results_log.params[1]
+18/1: results_log.summary()
+18/2:
+import numpy as np
+import pandas as pd 
+import statsmodels.api as sm
+import matplotlib.pyplot as plt 
+import seaborn as sns
+sns.set()
+18/3:
+raw_data = pd.read_csv('2.01. Admittance.csv')
+raw_data
+18/4:
+data = raw_data.copy()
+data['Admitted']= data['Admitted'].map({'Yes':1,'No':0})
+data
+18/5:
+y = data['Admitted']
+x1 = data['SAT']
+plt.scatter(x1,y,color = 'C0')
+plt.show()
+18/6:
+# ロジスティック回帰の実行
+x = sm.add_constant(x1)
+reg_log = sm.Logit(y,x)
+results_log = reg_log.fit()
+def f(x,b0,b1):
+    return np.array(np.exp(b0+x*b1)/(1+np.exp(b0+x*b1)))
+
+f_sorted = np.sort(f(x1,results_log.params[0],results_log.params[1]))
+x_sorted = np.sort(np.array(x1))
+
+plt.scatter(x1,y,color='C0')
+plt.plot(x_sorted,f_sorted,color="C8")
+plt.show()
+18/7: results_log.summary()
+18/8:
+raw_data = pd.read_csv('2.02. Binary predictors.csv')
+raw_data
+18/9:
+data = raw_data.copy()
+data['Admitted']=data['Admitted'].map({'Yes':1,'No':0})
+data['Gender']=data['Gender'].map({'Female':1,'Male':0})
+data
+18/10:
+y = data['Admitted']
+x1 = data['Gender']
+x = sm.add_constant(x1)
+reg_log=sm.Logit(y,x)
+results_log=reg_log.fit()
+results_log.summary()
+18/11:
+y = data['Admitted']
+x1 = data(['SAT','Gender'])
+x = sm.add_constant(x1)
+reg_log=sm.Logit(y,x)
+results_log=reg_log.fit()
+results_log.summary()
+18/12:
+y = data['Admitted']
+x1 = data[['SAT','Gender']]
+x = sm.add_constant(x1)
+reg_log=sm.Logit(y,x)
+results_log=reg_log.fit()
+results_log.summary()
+19/1:
+import numpy as np
+import pandas as pd 
+import statsmodels.api as sm
+import matplotlib.pyplot as plt 
+import seaborn as sns
+sns.set()
+19/2:
+raw_data = pd.read_csv('2.01. Admittance.csv')
+raw_data
+19/3:
+data = raw_data.copy()
+data['Admitted']= data['Admitted'].map({'Yes':1,'No':0})
+data
+19/4:
+y = data['Admitted']
+x1 = data['SAT']
+plt.scatter(x1,y,color = 'C0')
+plt.show()
+19/5:
+# ロジスティック回帰の実行
+x = sm.add_constant(x1)
+reg_log = sm.Logit(y,x)
+results_log = reg_log.fit()
+def f(x,b0,b1):
+    return np.array(np.exp(b0+x*b1)/(1+np.exp(b0+x*b1)))
+
+f_sorted = np.sort(f(x1,results_log.params[0],results_log.params[1]))
+x_sorted = np.sort(np.array(x1))
+
+plt.scatter(x1,y,color='C0')
+plt.plot(x_sorted,f_sorted,color="C8")
+plt.show()
+19/6:
+results_log.summary()
+# MLEは最尤推定法。作成したモデルが変数間の関係をどれくらいよく示しているか？
+# LL-Null...独立変数がないときのLL。LLが意味を持っているかを調べるのに用いる。LLRやpseudoRを求めるのに使う。
+19/7:
+raw_data = pd.read_csv('2.02. Binary predictors.csv')
+raw_data
+19/8:
+data = raw_data.copy()
+data['Admitted']=data['Admitted'].map({'Yes':1,'No':0})
+data['Gender']=data['Gender'].map({'Female':1,'Male':0})
+data
+19/9:
+y = data['Admitted']
+x1 = data[['SAT','Gender']]
+x = sm.add_constant(x1)
+reg_log=sm.Logit(y,x)
+results_log=reg_log.fit()
+results_log.summary()
+# coefはeのそれ乗すると何倍合格しやすいかを示すようになる。
+# 得られた結果の推測をする(理工学部なので女性の方が受かりやすくなっているのだろうなど。)のが大事。
+19/10: results_log.predict()
+19/11:
+np.set_printoptions(formatter=)
+results_log.predict()
+19/12:
+np.set_printoptions(formatter={'float':lambda x: "{0:0.2f}".format(x)})
+results_log.predict()
+19/13:
+results_log.pred_table()
+cm_df = pd.DataFrame(results_log.pred_table())
+cm_df.columns=['Predicted 0', 'Predicted 1']
+cm_df = cm_df.rename(index={0:'Actual 0',1:'Actual 1'})
+cm_df
+19/14:
+test = pd.read_csv('2.03. Test dataset.csv')
+test
+19/15:
+test['Admitted']=test['Admitted'].map({'Yes':1,'No':0})
+test['Gender']=test['Gender'].map({'Female':1,'Male':0})
+test
+19/16: x
+19/17:
+# 回帰においては順番も大事。そのため、一旦結果のカラムは別枠に移動。
+test_actual = test['Admitted']
+test_data = test.drop(['Admitted'],axis=1)
+19/18:
+# 回帰においては順番も大事。そのため、一旦結果のカラムは別枠に移動。
+test_actual = test['Admitted']
+test_data = test.drop(['Admitted'],axis=1)
+test_data = sm.add_constant(test_data)
+test_data
+19/19:
+def confusion_matrix(data,actual_values,model):
+    pred_values = model.predict(data)
+    bins=np.array([0,0.5,1])
+    cm = np.histogram2d(actual_values,pred_values,bins=bins)[0]
+    accuracy = (cm[0,0]+cm[1,1])/cm.sum()
+    return cm, accuracy
+19/20:
+cm = confusion_matrix(test_data,test_actual,results_log)
+cm
+20/1:
+import pandas as pd
+import numpy as np
+import matplotlib as plt
+import seaborn as sns
+20/2:
+import pandas as pd
+import numpy as np
+import matplotlib as plt
+import seaborn as sns
+sns.set()
+from sklearn.cluster import KMeans
+20/3:
+data = pd.read_csv('3.01. Country clusters.csv')
+data
+20/4:
+plt.scatter(data['Longitude'],data['Latitude'])
+plt.xlim(-180,180)
+plt.ylim(-90,90)
+plt.show
+20/5:
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+sns.set()
+from sklearn.cluster import KMeans
+20/6:
+data = pd.read_csv('3.01. Country clusters.csv')
+data
+20/7:
+plt.scatter(data['Longitude'],data['Latitude'])
+plt.xlim(-180,180)
+plt.ylim(-90,90)
+plt.show
+20/8:
+# ilocはdataをsliceするのに用いられる
+x = data.iloc[:,1:3]
+x
+20/9:
+# ilocはdataをsliceするのに用いられる
+x = data.iloc[:,1:2]
+x
+20/10:
+# ilocはdataをsliceするのに用いられる
+x = data.iloc[:,1:4]
+x
+20/11:
+# ilocはdataをsliceするのに用いられる
+x = data.iloc[:,1:3]
+x
+20/12:
+kmeans = KMeans(2)
+kmeans.fit(x)
+20/13:
+identified_clusters = kmeans.fit_predict(x)
+identified_clusters
+data_with_clusters = data.copy()
+data_with_clusters['Clusters']=identified_clusters
+data_with_clusters
+20/14:
+plt.scatter(data_with_clusters['Longitude'],data_with_clusters['Latitude'],c= data_with_clusters['Cluster'])
+plt.xlim(-180,180)
+plt.ylim(-90,90)
+plt.show
+20/15:
+plt.scatter(data_with_clusters['Longitude'],data_with_clusters['Latitude'],c= data_with_clusters['Clusters'])
+plt.xlim(-180,180)
+plt.ylim(-90,90)
+plt.show
+20/16:
+plt.scatter(data_with_clusters['Longitude'],data_with_clusters['Latitude'],c= data_with_clusters['Clusters'],cmap = 'rainbow')
+plt.xlim(-180,180)
+plt.ylim(-90,90)
+plt.show
+20/17:
+kmeans = KMeans(3)
+kmeans.fit(x)
+20/18:
+identified_clusters = kmeans.fit_predict(x)
+identified_clusters
+data_with_clusters = data.copy()
+data_with_clusters['Clusters']=identified_clusters
+data_with_clusters
+20/19:
+plt.scatter(data_with_clusters['Longitude'],data_with_clusters['Latitude'],c= data_with_clusters['Clusters'],cmap = 'rainbow')
+plt.xlim(-180,180)
+plt.ylim(-90,90)
+plt.show
+20/20:
+data_mapped = data.copy()
+data_mapped['Language']=data_mapped['Language'].map({'English':0,'French':1,'German':2})
+data_mapped
+20/21: x = data_mapped.iloc[:,3:4]
+20/22:
+kmeans = KMeans(3)
+kmeans.fit(x)
+identified_clusters = kmeans.fit_predict(x)
+identified_clusters
+data_with_clusters = data.copy()
+data_with_clusters['Clusters']=identified_clusters
+data_with_clusters
+20/23:
+plt.scatter(data_with_clusters['Longitude'],data_with_clusters['Latitude'],c= data_with_clusters['Clusters'],cmap = 'rainbow')
+plt.xlim(-180,180)
+plt.ylim(-90,90)
+plt.show
+20/24: x = data_mapped.iloc[:,1:4]
+20/25:
+kmeans = KMeans(3)
+kmeans.fit(x)
+identified_clusters = kmeans.fit_predict(x)
+identified_clusters
+data_with_clusters = data.copy()
+data_with_clusters['Clusters']=identified_clusters
+data_with_clusters
+20/26:
+plt.scatter(data_with_clusters['Longitude'],data_with_clusters['Latitude'],c= data_with_clusters['Clusters'],cmap = 'rainbow')
+plt.xlim(-180,180)
+plt.ylim(-90,90)
+plt.show
+20/27: kmeans.inertia_
+20/28:
+kmeans = KMeans(2)
+kmeans.fit(x)
+identified_clusters = kmeans.fit_predict(x)
+identified_clusters
+data_with_clusters = data.copy()
+data_with_clusters['Clusters']=identified_clusters
+data_with_clusters
+20/29:
+plt.scatter(data_with_clusters['Longitude'],data_with_clusters['Latitude'],c= data_with_clusters['Clusters'],cmap = 'rainbow')
+plt.xlim(-180,180)
+plt.ylim(-90,90)
+plt.show
+20/30: kmeans.inertia_
+20/31:
+wcsslist = []
+for i in range(1,7):
+    kmeans = KMeans(i)
+    kmeans.fit(x)
+    wcsslist.append(kmeans.inertia_)
+20/32: wcsslist
+20/33:
+number_clusters = range(1,7)
+plt.plot(number_clusters,wcss)
+plt.show()
+20/34:
+number_clusters = range(1,7)
+plt.plot(number_clusters,wcsslist)
+plt.show()
+24/1:
+data = pd.read_csv('3.12. Example.csv')
+data
+24/2:
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+sns.set()
+from sklearn.cluster import KMeans
+24/3:
+data = pd.read_csv('3.01. Country clusters.csv')
+data
+24/4:
+plt.scatter(data['Longitude'],data['Latitude'])
+plt.xlim(-180,180)
+plt.ylim(-90,90)
+plt.show
+24/5:
+# ilocはdataをsliceするのに用いられる。一つ目は何列ぶん、二つ目は何行分(但し、最初の数は+1)を表す。
+x = data.iloc[:,1:3]
+x
+24/6:
+kmeans = KMeans(3)
+kmeans.fit(x)
+24/7:
+identified_clusters = kmeans.fit_predict(x)
+identified_clusters
+data_with_clusters = data.copy()
+data_with_clusters['Clusters']=identified_clusters
+data_with_clusters
+24/8:
+plt.scatter(data_with_clusters['Longitude'],data_with_clusters['Latitude'],c= data_with_clusters['Clusters'],cmap = 'rainbow')
+plt.xlim(-180,180)
+plt.ylim(-90,90)
+plt.show
+24/9:
+data_mapped = data.copy()
+data_mapped['Language']=data_mapped['Language'].map({'English':0,'French':1,'German':2})
+data_mapped
+24/10: x = data_mapped.iloc[:,1:4]
+24/11:
+kmeans = KMeans(2)
+kmeans.fit(x)
+identified_clusters = kmeans.fit_predict(x)
+identified_clusters
+data_with_clusters = data.copy()
+data_with_clusters['Clusters']=identified_clusters
+data_with_clusters
+24/12:
+plt.scatter(data_with_clusters['Longitude'],data_with_clusters['Latitude'],c= data_with_clusters['Clusters'],cmap = 'rainbow')
+plt.xlim(-180,180)
+plt.ylim(-90,90)
+plt.show
+24/13:
+# wcss(最小二乗的な数)
+kmeans.inertia_
+24/14:
+wcsslist = []
+for i in range(1,7):
+    kmeans = KMeans(i)
+    kmeans.fit(x)
+    wcsslist.append(kmeans.inertia_)
+24/15: wcsslist
+24/16:
+#大きすぎもなく小さすぎもないため3が最適っぽい。
+number_clusters = range(1,7)
+plt.plot(number_clusters,wcsslist)
+plt.show()
+24/17:
+data = pd.read_csv('3.12. Example.csv')
+data
+24/18:
+plt.scatter(data['Satisfaction'],data['Loyalty'])
+plt.xlabel('Satisfaction')
+plt.ylabel('Loyalty')
+24/19:
+x = data.copy()
+kmeans = KMeans(2)
+kmeans.fit(x)
+24/20:
+clusters = x.copy()
+clusters = ['cluster_pred']=kmeans.fit_predict(x)
+plt.scatter(clusters['Satisfaction'],clusters['Loyalty'],c=clusters['cluster_pred'],cmap = 'rainbow')
+24/21:
+clusters = x.copy()
+clusters['cluster_pred']=kmeans.fit_predict(x)
+plt.scatter(clusters['Satisfaction'],clusters['Loyalty'],c=clusters['cluster_pred'],cmap = 'rainbow')
+24/22:
+from sklearn import preprocessing
+x_sclaed = preprocessing.scale(x)
+24/23:
+from sklearn import preprocessing
+x_sclaed = preprocessing.scale(x)
+wcss = []
+for i in range(1,10):
+    kmeans = KMeans(i)
+    kmeans.fit(x)
+    wcss.append(kmeans.inertia_)
+plt.plot(range(1,10),wcss)
+24/24:
+kmeans_new = KMeans(2)
+kmeans_new.fit(x_scaled)
+clusters_new = x.copy()
+clusters_new['cluster_pred'] = kmeans_new.fit_predict(x_scaled)
+clusters_new
+24/25:
+from sklearn import preprocessing
+x_scaled = preprocessing.scale(x)
+wcss = []
+for i in range(1,10):
+    kmeans = KMeans(i)
+    kmeans.fit(x)
+    wcss.append(kmeans.inertia_)
+plt.plot(range(1,10),wcss)
+24/26:
+kmeans_new = KMeans(2)
+kmeans_new.fit(x_scaled)
+clusters_new = x.copy()
+clusters_new['cluster_pred'] = kmeans_new.fit_predict(x_scaled)
+clusters_new
+24/27: plt.scatter(clusters_new['Satisfaction'],clusters_new['Loyalty'],c=clusters_new['cluster_pred'],cmap = 'rainbow')
+24/28:
+data = pd.read_csv('Country clusters standardized.csv',index_col ='Country')
+data
+24/29:
+data = pd.read_csv('Country clusters standardized.csv')
+data
+24/30:
+data = pd.read_csv('Country clusters standardized.csv',index_col ='Country')
+data
+24/31:
+x_scaled = data.copy()
+x_scaled = x_scaled.drop(['Language'],axis= 1)
+x_scaled
+24/32: sns.colormap(x_scaled)
+24/33: sns.clustermap(x_scaled)
+25/1: import numpy as np
+25/2: m = np.array([[5,12,6],[-3,0,14]])
+25/3: m
+25/4: type(m)
+25/5: shape(m)
+25/6: m.shape
+25/7:
+m2 = np.array([[9,8,7],[1,3,-5]])
+#テンソル作成
+t = np.array([m,m2])
+t
+25/8: t.shape
+25/9:
+#転置
+m.T
+25/10:
+x = np.array([1,2,3])
+x_reshape = x.reshape(1,3)
+x.T
+25/11:
+x = np.array([1,2,3])
+x_reshape = x.reshape(1,3)
+x_reshape.T
+25/12: m
+25/13: s = np.array([[1,2,3],[4,5,6]])
+25/14:
+s = np.array([[1,2,3],[4,5,6]])
+np.dot(m,s)
+25/15:
+s = np.array([[1,2,3],[4,5,6]])
+np.dot(m,s.T)
+26/1:
+import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+26/2:
+observations = 1000
+
+xs = np.random.uniform(low = -10,high = 10,size=(observations,1))
+
+zs = np.random.uniform(-10, 10,size(observations,1))
+
+inputs = np.column_stack((xs,zs))
+print(inputs.shape)
+26/3:
+observations = 1000
+
+xs = np.random.uniform(low = -10,high = 10,size=(observations,1))
+
+zs = np.random.uniform(-10, 10,(observations,1))
+
+inputs = np.column_stack((xs,zs))
+print(inputs.shape)
+26/4:
+noise = np.random.uniform(-1,1,(observations, 1))
+#ターゲット
+targets = 2*xs - 3*zs + 5  + noise
+print(targets.shape)
+26/5:
+targets = targets.reshape(observations,)
+fig  = plt.figure()
+ax  = fig.add_subplot(111.projection = '3d')
+ax.plot(xs,zs,targets)
+ax.view_init(azim = 1000)
+plt.show()
+targets = targets.reshape(observations, 1)
+26/6:
+targets = targets.reshape(observations,)
+fig  = plt.figure()
+ax  = fig.add_subplot(111. projection = '3d')
+ax.plot(xs,zs,targets)
+ax.view_init(azim = 1000)
+plt.show()
+targets = targets.reshape(observations, 1)
+26/7:
+targets = targets.reshape(observations,)
+fig  = plt.figure()
+ax  = fig.add_subplot(111, projection = '3d')
+ax.plot(xs,zs,targets)
+ax.view_init(azim = 1000)
+plt.show()
+targets = targets.reshape(observations, 1)
+26/8:
+targets = targets.reshape(observations,)
+fig  = plt.figure()
+ax  = fig.add_subplot(111. projection = '3d')
+ax.plot(xs,zs,targets)
+ax.view_init(azim = 1000)
+plt.show()
+targets = targets.reshape(observations, 1)
+26/9:
+targets = targets.reshape(observations,)
+fig  = plt.figure()
+ax  = fig.add_subplot(111. projection = '3d')
+ax.plot(xs,zs,targets)
+ax.view_init(azim = 100)
+plt.show()
+targets = targets.reshape(observations, 1)
+26/10:
+targets = targets.reshape(observations,)
+fig  = plt.figure()
+ax  = fig.add_subplot(111, projection = '3d')
+ax.plot(xs,zs,targets)
+ax.view_init(azim = 100)
+plt.show()
+targets = targets.reshape(observations, 1)
+26/11:
+targets = targets.reshape(observations,)
+fig  = plt.figure()
+ax  = fig.add_subplot(111, projection = '3d')
+ax.plot(xs,zs,targets)
+ax.view_init(azim = 100)
+plt.show()
+26/12:
+targets = targets.reshape(observations,)
+fig  = plt.figure()
+ax  = fig.add_subplot(111, projection = '3d')
+ax.plot(xs,zs,targets)
+ax.view_init(azim = 100)
+plt.show()
+targets = targets.reshape(observations, 1)
+26/13:
+targets = targets.reshape(observations,1)
+fig  = plt.figure()
+ax  = fig.add_subplot(111, projection = '3d')
+ax.plot(xs,zs,targets)
+ax.view_init(azim = 100)
+plt.show()
+targets = targets.reshape(observations, 1)
+26/14:
+targets = targets.reshape(observations,)
+fig  = plt.figure()
+ax  = fig.add_subplot(111, projection = '3d')
+ax.plot(xs,zs,targets)
+ax.view_init(azim = 100)
+plt.show()
+targets = targets.reshape(observations, 1)
+26/15:
+targets = targets.reshape(observations,)
+xs = xs.reshape(observations,)
+zs = zs.reshape(observations,)
+fig  = plt.figure()
+ax  = fig.add_subplot(111, projection = '3d')
+ax.plot(xs,zs,targets)
+ax.view_init(azim = 100)
+plt.show()
+targets = targets.reshape(observations, 1)
+26/16:
+init_range = 0.1
+weights = np.random.uniform(low=-init_range,size=(2,1))
+biases = np.random.uniform(low= -init_range,size=1)
+print(weights)
+print(biases)
+26/17:
+init_range = 0.1
+weights = np.random.uniform(low=-init_range,high = init_range,size=(2,1))
+biases = np.random.uniform(low= -init_range,high = init_range,size=1)
+print(weights)
+print(biases)
+26/18:
+learning_rate = 0.01
+for i in range(100):
+    outputs = np.dot(inputs,weights)+biases
+    deltas = outputs - targets
+    loss = np.sum(deltas**2)/2/observations
+    print(loss)
+    deltas_scaled = deltas/observations
+    weights =weights - learning_rate*np.dot(inputs.T, deltas_scaled)
+    biases = biases -learning_rate*np.sum(deltas_scaled)
+26/19: pirnt(weights,biases)
+26/20: print(weights,biases)
+26/21:
+learning_rate = 0.01
+for i in range(200):
+    outputs = np.dot(inputs,weights)+biases
+    deltas = outputs - targets
+    loss = np.sum(deltas**2)/2/observations
+    print(loss)
+    deltas_scaled = deltas/observations
+    weights =weights - learning_rate*np.dot(inputs.T, deltas_scaled)
+    biases = biases -learning_rate*np.sum(deltas_scaled)
+26/22:
+print(weights,biases)
+#2,-3,5と少しずれている。
+26/23:
+plt.plot(outputs,targets)
+plt.show
+27/1: import tensorflow
+28/1: import tensorflow as tf
+28/2:
+import numpy as np
+import matplotlib.pyplot as plt
+28/3:
+import numpy as np
+import matplotlib.pyplot as plt
+28/4:
+observations = 1000
+xs = np.random.uniform(10,-10,(observations,1))
+zs = np.random.uniform(10,-10,(observations,1))
+generated_inputs = np.column_stack((xs,zs))
+noise = np.random.uniform(-1,1,(observations,1))
+generated_targets = 2*xs - 3*zs +5 +noise
+np.savez('TF_intro',inputs = generated_inputs, targets = generated_targets)
+28/5:
+input_size = 2
+output_size = 1
+
+model = tf.keras.Sequential([
+    #線形モデル作成のコード
+    tf.keras.layers.Dense(output_size)
+])
+model.compile(optimizer='sgd',loss ='mean_squared_error')
+model.fit(training_data['inputs'],training_data['targets'],epochs =100, verbose=0)
+28/6: training_data = np.load('TF_intro.npz')
+28/7:
+input_size = 2
+output_size = 1
+
+model = tf.keras.Sequential([
+    #線形モデル作成のコード
+    tf.keras.layers.Dense(output_size)
+])
+model.compile(optimizer='sgd',loss ='mean_squared_error')
+model.fit(training_data['inputs'],training_data['targets'],epochs =100, verbose=0)
+28/8:
+input_size = 2
+output_size = 1
+
+model = tf.keras.Sequential([
+    #線形モデル作成のコード
+    tf.keras.layers.Dense(output_size)
+])
+#目的関数、最適化アルゴリズムの指定（確率的勾配効果法、ヘルツノルム損失:二乗誤差（平均でわって汎用性を高める。))
+model.compile(optimizer='sgd',loss ='mean_squared_error')
+model.fit(training_data['inputs'],training_data['targets'],epochs =100, verbose=1)
+28/9:
+input_size = 2
+output_size = 1
+
+model = tf.keras.Sequential([
+    #線形モデル作成のコード
+    tf.keras.layers.Dense(output_size)
+])
+#目的関数、最適化アルゴリズムの指定（確率的勾配効果法、ヘルツノルム損失:二乗誤差（平均でわって汎用性を高める。))
+model.compile(optimizer='sgd',loss ='mean_squared_error')
+model.fit(training_data['inputs'],training_data['targets'],epochs =100, verbose=2)
+28/10: model.layers[0].get_weights()
+28/11:
+weights = model.layers[0].get_weights()[0]
+biases = model.layers[0].get_weights()[1]
+biases
+28/12: model.predict_on_batch(training_data['inputs']).numpy().round(1)
+28/13: model.predict_on_batch(training_data['inputs']).round(1)
+28/14: training_data['targets'].round(1)
+28/15: plt.plot(np.squeeze(model.predict_on_batch(training_data['inputs'])),np.squeeze(training_data['targets']))
+28/16:
+input_size = 2
+output_size = 1
+
+model = tf.keras.Sequential([
+    #線形モデル作成のコード
+    tf.keras.layers.Dense(output_size
+                         kernel_initializer = tf.random_uniform_initializer(minval = -0.1,maxval = 0.1),
+                         bias_initializer = tf.random_uniform_initializer(minval = -0.1,maxval=0.1))
+])
+#目的関数、最適化アルゴリズムの指定（確率的勾配効果法、ヘルツノルム損失:二乗誤差（平均でわって汎用性を高める。))
+model.compile(optimizer='sgd',loss ='mean_squared_error')
+model.fit(training_data['inputs'],training_data['targets'],epochs =100, verbose=2)
+28/17:
+input_size = 2
+output_size = 1
+
+model = tf.keras.Sequential([
+    #線形モデル作成のコード
+    tf.keras.layers.Dense(output_size,
+                         kernel_initializer = tf.random_uniform_initializer(minval = -0.1,maxval = 0.1),
+                         bias_initializer = tf.random_uniform_initializer(minval = -0.1,maxval=0.1))
+])
+#目的関数、最適化アルゴリズムの指定（確率的勾配効果法、ヘルツノルム損失:二乗誤差（平均でわって汎用性を高める。))
+model.compile(optimizer='sgd',loss ='mean_squared_error')
+model.fit(training_data['inputs'],training_data['targets'],epochs =100, verbose=2)
+28/18: plt.plot(np.squeeze(model.predict_on_batch(training_data['inputs'])),np.squeeze(training_data['targets']))
+29/1:
+import numpy as np
+import tensorflow as tf
+import tensorflow_datasets as tfds
+29/2:
+import numpy as np
+import tensorflow as tf
+import tensorflow_datasets as tfds
+29/3:
+#as_supervisedは正解データも持ってくる。
+mnist_dataset,mnist_info=tfds.load(name='mnist',with_info=True,as_supervised=True)
+29/4:
+#as_supervisedは正解データも持ってくる。
+mnist_dataset,mnist_info=tfds.load(name='mnist',with_info=True,as_supervised=True)
+29/5:
+#as_supervisedは正解データも持ってくる。
+mnist_dataset,mnist_info=tfds.load(name='mnist',with_info=True,as_supervised=True)
+29/6:
+#as_supervisedは正解データも持ってくる。
+mnist_dataset,mnist_info=tfds.load(name='mnist',with_info=True,as_supervised=True)
+30/1:
+import numpy as np
+import tensorflow as tf
+import tensorflow_datasets as tfds
+30/2:
+#as_supervisedは正解データも持ってくる。
+mnist_dataset,mnist_info=tfds.load(name='mnist',with_info=True,as_supervised=True)
+30/3:
+#as_supervisedは正解データも持ってくる。
+mnist_dataset,mnist_info=tfds.load(name='mnist',with_info=True,as_supervised=True)
+mnist_info
+30/4:
+mnist_train, mnist_test = mnist_dataset['train'],mnist_dataset['test']
+#検証用は自分で指定する
+num_validation_samples= 0.1*mnist_info.splits['train'].num_example
+num_validation_samples
+30/5:
+mnist_train, mnist_test = mnist_dataset['train'],mnist_dataset['test']
+#検証用は自分で指定する
+num_validation_samples= 0.1*mnist_info.splits['train'].num_examples
+num_validation_samples
+30/6:
+mnist_train, mnist_test = mnist_dataset['train'],mnist_dataset['test']
+#検証用は自分で指定する(10%をそうする。)
+num_validation_samples= 0.1*mnist_info.splits['train'].num_examples
+num_validation_samples=tf.cast(num_validation_samples,tf.int64)
+num_test_samples=mnist_info.splits['test'].num_examples
+num_test_samples = tf.cast(num_test_samples,tf.info64)
+30/7:
+mnist_train, mnist_test = mnist_dataset['train'],mnist_dataset['test']
+#検証用は自分で指定する(10%をそうする。)
+num_validation_samples= 0.1*mnist_info.splits['train'].num_examples
+num_validation_samples=tf.cast(num_validation_samples,tf.int64)
+num_test_samples=mnist_info.splits['test'].num_examples
+num_test_samples = tf.cast(num_test_samples,tf.int64)
+30/8:
+mnist_train, mnist_test = mnist_dataset['train'],mnist_dataset['test']
+#検証用は自分で指定する(10%をそうする。)
+num_validation_samples= 0.1*mnist_info.splits['train'].num_examples
+num_validation_samples=tf.cast(num_validation_samples,tf.int64)
+num_test_samples=mnist_info.splits['test'].num_examples
+num_test_samples = tf.cast(num_test_samples,tf.int64)
+num_test_samples
+30/9:
+mnist_train, mnist_test = mnist_dataset['train'],mnist_dataset['test']
+#検証用は自分で指定する(10%をそうする。)
+num_validation_samples= 0.1*mnist_info.splits['train'].num_examples
+num_validation_samples=tf.cast(num_validation_samples,tf.int64)
+num_test_samples=mnist_info.splits['test'].num_examples
+num_test_samples = tf.cast(num_test_samples,tf.int64)
+#feature scaling(0~1にする)
+def scale(image, label):
+    image = tf.cast(image,tf.float32)
+    image /= 255
+    return image,label
+scaled_train_and_validation_data=mnist_train.map(scale)
+test_data = mnist_test.map(scale)
+30/10:
+BUFFER_SIZE = 10000
+suffled_train_and_validation_data = scaled_train_and_validation_data.shuffle(BUFFER_SIZE)
+30/11:
+# 指定した数ごとにシャッフルをする(メモリ過多を防ぐ)
+BUFFER_SIZE = 10000
+suffled_train_and_validation_data = scaled_train_and_validation_data.shuffle(BUFFER_SIZE)
+30/12:
+validation_data = shuffled_train_and_validation_data.take(num_validation_samples)
+train_data = shuffled_train_and_validatioin_data.skip()
+30/13:
+# 指定した数ごとにシャッフルをする(メモリ過多を防ぐ)
+BUFFER_SIZE = 10000
+shuffled_train_and_validation_data = scaled_train_and_validation_data.shuffle(BUFFER_SIZE)
+30/14:
+validation_data = shuffled_train_and_validation_data.take(num_validation_samples)
+train_data = shuffled_train_and_validatioin_data.skip()
+30/15:
+validation_data = shuffled_train_and_validation_data.take(num_validation_samples)
+train_data = shuffled_train_and_validation_data.skip()
+30/16:
+validation_data = shuffled_train_and_validation_data.take(num_validation_samples)
+#skip内に記述することでvalidationdataの中に入っているデータを取り除くことができる。
+train_data = shuffled_train_and_validation_data.skip(num_validation_samples)
+30/17:
+BATCH_SIZE = 100
+#訓練はバックプロパゲーションが計算量多いため100ずつ行うが、testと検証用はフォワードプロパゲーションのみなのでバッチ処理の必要なし
+train_data = train_data.batch(BATCH_SIZE)
+validatioin_data=validation_data.batch(num_validation_samples)
+test_data = test_data.batch(num_test_samples)
+#検証用はinputとターゲットを分ける。
+validation_inputs,validation_targets = next(iter(validation_data))
+30/18:
+input_size = 784
+output_size = 10
+hidden_layer_size = 50
+
+model = tf.keras.Sequential([
+    tf.keras.layers.Flatten(input_shape = (28,28,1)),
+    #次の層の計算(重みをかけ、バイアスをたす操作)
+    tf.keras.layers.Dense(hidden_layer_size,activation='relu'),
+    tf.keras.layers.Dense(hidden_layer_size,activation='relu'),
+    tf.keras.layers.Dense(output_size,activation='softmax')
+])
+30/19:
+#最適化アルゴリズムはadam,データのエンコーディングはワンホットエンコーディング、
+model.compile(optimizer='adam',loss = 'sparse_categorical_crossentropy',metrics=['accuracy'])
+30/20:
+NUM_EPOCHS = 5
+VALIDATION_STEPS = num_validation_samples
+model.fit(train_data,epochs = NUM_EPOCHS,validation_data=(validation_inputs,validation_targets),validation_steps=VALIDATION_STEPS,verbose=2)
+30/21:
+import numpy as np
+import tensorflow as tf
+import tensorflow_datasets as tfds
+30/22:
+#as_supervisedは正解データも持ってくる。
+mnist_dataset,mnist_info=tfds.load(name='mnist',with_info=True,as_supervised=True)
+mnist_info
+30/23:
+mnist_train, mnist_test = mnist_dataset['train'],mnist_dataset['test']
+#検証用は自分で指定する(10%をそうする。)
+num_validation_samples= 0.1*mnist_info.splits['train'].num_examples
+num_validation_samples=tf.cast(num_validation_samples,tf.int64)
+num_test_samples=mnist_info.splits['test'].num_examples
+num_test_samples = tf.cast(num_test_samples,tf.int64)
+#feature scaling(0~1にする)
+def scale(image, label):
+    image = tf.cast(image,tf.float32)
+    image /= 255
+    return image,label
+scaled_train_and_validation_data=mnist_train.map(scale)
+test_data = mnist_test.map(scale)
+30/24:
+# 指定した数ごとにシャッフルをする(メモリ過多を防ぐ)
+BUFFER_SIZE = 10000
+shuffled_train_and_validation_data = scaled_train_and_validation_data.shuffle(BUFFER_SIZE)
+30/25:
+validation_data = shuffled_train_and_validation_data.take(num_validation_samples)
+#skip内に記述することでvalidationdataの中に入っているデータを取り除くことができる。
+train_data = shuffled_train_and_validation_data.skip(num_validation_samples)
+30/26:
+BATCH_SIZE = 100
+#訓練はバックプロパゲーションが計算量多いため100ずつ行うが、testと検証用はフォワードプロパゲーションのみなのでバッチ処理の必要なし
+train_data = train_data.batch(BATCH_SIZE)
+validatioin_data=validation_data.batch(num_validation_samples)
+test_data = test_data.batch(num_test_samples)
+#検証用はinputとターゲットを分ける。
+validation_inputs,validation_targets = next(iter(validation_data))
+30/27:
+input_size = 784
+output_size = 10
+hidden_layer_size = 50
+
+model = tf.keras.Sequential([
+    tf.keras.layers.Flatten(input_shape = (28,28,1)),
+    #隠れ層の計算(重みをかけ、バイアスをたす操作)
+    tf.keras.layers.Dense(hidden_layer_size,activation='relu'),
+    tf.keras.layers.Dense(hidden_layer_size,activation='relu'),
+    tf.keras.layers.Dense(output_size,activation='softmax')
+])
+30/28:
+#最適化アルゴリズムはadam,データのエンコーディングはワンホットエンコーディング、計算の途中で出していきたい値は正確性。
+model.compile(optimizer='adam',loss = 'sparse_categorical_crossentropy',metrics=['accuracy'])
+30/29:
+NUM_EPOCHS = 5
+VALIDATION_STEPS = num_validation_samples
+model.fit(train_data,epochs = NUM_EPOCHS,validation_data=(validation_inputs,validation_targets),validation_steps=VALIDATION_STEPS,verbose=2)
+31/1:
+import numpy as np
+import tensorflow as tf
+
+# tensorflow-datasetsモジュールを使ってMNISTデータセットをインポートしていきます。まだインストールしていない場合は以下のコマンドでインストールしましょう。
+# pip install tensorflow-datasets 
+# conda install tensorflow-datasets
+
+import tensorflow_datasets as tfds
+
+# このデータセットは、C:\Users\*USERNAME*\tensorflow_datasets\...に保存されます。
+31/2:
+# tfds.loadを使ってデータセットを読み込んでいきます 
+mnist_dataset, mnist_info = tfds.load(name='mnist', with_info=True, as_supervised=True)
+# with_info=True をすることによって、データに関する情報を得ることができるようになります。
+
+# as_supervised=Trueをすることによって、データを入力とターゲットの二つののタプル形式で作成することができます 
+
+# 訓練用データとテスト用データをそれぞれの変数に代入します
+mnist_train, mnist_test = mnist_dataset['train'], mnist_dataset['test']
+
+# ここから検証用データセットを作っていきます。まずは、検証用データに割り当てる割合を決めます。
+num_validation_samples = 0.1 * mnist_info.splits['train'].num_examples
+# 数字を整数に変換していきます（既に整数になっている場合も念のため行います）
+num_validation_samples = tf.cast(num_validation_samples, tf.int64)
+
+# テストデータの数も変数に入れていきます
+num_test_samples = mnist_info.splits['test'].num_examples
+# 数字を整数に変換していきます
+num_test_samples = tf.cast(num_test_samples, tf.int64)
+
+
+# 元の入力データの範囲である0から255を0と1に変えていきます
+# 今回は、変換するための関数を作成していきます
+def scale(image, label):
+    # 数字が小数であることを確認します
+    image = tf.cast(image, tf.float32)
+    # 0と1の範囲におさめるため、255で割っていきます 
+    image /= 255.
+
+    return image, label
+
+
+# mapメソッドを使ってデータの変換を行っていきます
+scaled_train_and_validation_data = mnist_train.map(scale)
+
+# テストデータに関しても同様の変換を行っていきます
+test_data = mnist_test.map(scale)
+
+#データをシャッフルするためのバッファのサイズを決めていきます
+BUFFER_SIZE = 10000
+
+# シャッフルメソッドを使ってデータをシャッフルしていきます
+shuffled_train_and_validation_data = scaled_train_and_validation_data.shuffle(BUFFER_SIZE)
+
+# takeメソッドを使ってシャッフルした検証用データを変数に代入していきます
+validation_data = shuffled_train_and_validation_data.take(num_validation_samples)
+
+# skipメソッドを使って訓練用データセットを変数に代入します
+train_data = shuffled_train_and_validation_data.skip(num_validation_samples)
+
+# batchの大きさを定義します
+BATCH_SIZE = 100
+
+# 訓練データをバッチの数毎に分けていきます
+train_data = train_data.batch(BATCH_SIZE)
+
+validation_data = validation_data.batch(num_validation_samples)
+
+# テストデータに関してもバッチ毎に分けていきます
+test_data = test_data.batch(num_test_samples)
+
+
+# バリデーションデータセットに関し、入力とターゲットそれぞれの変数を作成していきます
+validation_inputs, validation_targets = next(iter(validation_data))
+31/3:
+input_size = 784
+output_size = 10
+# 隠れ層のユニットの数を定義します
+hidden_layer_size = 50
+    
+# モデルの定義を進めていきます
+model = tf.keras.Sequential([
+    
+    # 入力層の定義をしていきます
+    # もとの行列のデータをベクトルに変換します
+    tf.keras.layers.Flatten(input_shape=(28, 28, 1)), # 入力層
+    
+    # tf.keras.layers.Dense は線形結合をするための計算を行います。つまり、入力と重みの積にバイアスを追加する形です
+    # 引数として、ここでは隠れ層の数と活性化関数を指定します
+    tf.keras.layers.Dense(hidden_layer_size, activation='relu'), # 1番目の隠れ層
+    tf.keras.layers.Dense(hidden_layer_size, activation='relu'), # 2番目の隠れ層
+    
+    # 最後の層の活性関数はソフトマックスとします
+    tf.keras.layers.Dense(output_size, activation='softmax') # 出力層
+])
+31/4:
+# 最適化アルゴリズムはadamを、損失関数はクロスエントロピーを使っていきます
+model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+31/5:
+# 繰り返しの回数を決めます
+NUM_EPOCHS = 5
+
+# モデルに対してデータを入れて演算を行っていきます
+model.fit(train_data, epochs=NUM_EPOCHS, validation_data=(validation_inputs, validation_targets), verbose =2)
+30/30:
+NUM_EPOCHS = 5
+VALIDATION_STEPS = num_validation_samples
+model.fit(train_data,epochs = NUM_EPOCHS,validation_data=(validation_inputs,validation_targets),verbose=2)
+31/6:
+import numpy as np
+import tensorflow as tf
+
+# tensorflow-datasetsモジュールを使ってMNISTデータセットをインポートしていきます。まだインストールしていない場合は以下のコマンドでインストールしましょう。
+# pip install tensorflow-datasets 
+# conda install tensorflow-datasets
+
+import tensorflow_datasets as tfds
+
+# このデータセットは、C:\Users\*USERNAME*\tensorflow_datasets\...に保存されます。
+31/7:
+# tfds.loadを使ってデータセットを読み込んでいきます 
+mnist_dataset, mnist_info = tfds.load(name='mnist', with_info=True, as_supervised=True)
+# with_info=True をすることによって、データに関する情報を得ることができるようになります。
+
+# as_supervised=Trueをすることによって、データを入力とターゲットの二つののタプル形式で作成することができます 
+
+# 訓練用データとテスト用データをそれぞれの変数に代入します
+mnist_train, mnist_test = mnist_dataset['train'], mnist_dataset['test']
+
+# ここから検証用データセットを作っていきます。まずは、検証用データに割り当てる割合を決めます。
+num_validation_samples = 0.1 * mnist_info.splits['train'].num_examples
+# 数字を整数に変換していきます（既に整数になっている場合も念のため行います）
+num_validation_samples = tf.cast(num_validation_samples, tf.int64)
+
+# テストデータの数も変数に入れていきます
+num_test_samples = mnist_info.splits['test'].num_examples
+# 数字を整数に変換していきます
+num_test_samples = tf.cast(num_test_samples, tf.int64)
+
+
+# 元の入力データの範囲である0から255を0と1に変えていきます
+# 今回は、変換するための関数を作成していきます
+def scale(image, label):
+    # 数字が小数であることを確認します
+    image = tf.cast(image, tf.float32)
+    # 0と1の範囲におさめるため、255で割っていきます 
+    image /= 255.
+
+    return image, label
+
+
+# mapメソッドを使ってデータの変換を行っていきます
+scaled_train_and_validation_data = mnist_train.map(scale)
+
+# テストデータに関しても同様の変換を行っていきます
+test_data = mnist_test.map(scale)
+
+#データをシャッフルするためのバッファのサイズを決めていきます
+BUFFER_SIZE = 10000
+
+# シャッフルメソッドを使ってデータをシャッフルしていきます
+shuffled_train_and_validation_data = scaled_train_and_validation_data.shuffle(BUFFER_SIZE)
+
+# takeメソッドを使ってシャッフルした検証用データを変数に代入していきます
+validation_data = shuffled_train_and_validation_data.take(num_validation_samples)
+
+# skipメソッドを使って訓練用データセットを変数に代入します
+train_data = shuffled_train_and_validation_data.skip(num_validation_samples)
+
+# batchの大きさを定義します
+BATCH_SIZE = 100
+
+# 訓練データをバッチの数毎に分けていきます
+train_data = train_data.batch(BATCH_SIZE)
+
+validation_data = validation_data.batch(num_validation_samples)
+
+# テストデータに関してもバッチ毎に分けていきます
+test_data = test_data.batch(num_test_samples)
+
+
+# バリデーションデータセットに関し、入力とターゲットそれぞれの変数を作成していきます
+validation_inputs, validation_targets = next(iter(validation_data))
+31/8:
+input_size = 784
+output_size = 10
+# 隠れ層のユニットの数を定義します
+hidden_layer_size = 50
+    
+# モデルの定義を進めていきます
+model = tf.keras.Sequential([
+    
+    # 入力層の定義をしていきます
+    # もとの行列のデータをベクトルに変換します
+    tf.keras.layers.Flatten(input_shape=(28, 28, 1)), # 入力層
+    
+    # tf.keras.layers.Dense は線形結合をするための計算を行います。つまり、入力と重みの積にバイアスを追加する形です
+    # 引数として、ここでは隠れ層の数と活性化関数を指定します
+    tf.keras.layers.Dense(hidden_layer_size, activation='relu'), # 1番目の隠れ層
+    tf.keras.layers.Dense(hidden_layer_size, activation='relu'), # 2番目の隠れ層
+    
+    # 最後の層の活性関数はソフトマックスとします
+    tf.keras.layers.Dense(output_size, activation='softmax') # 出力層
+])
+31/9:
+# 最適化アルゴリズムはadamを、損失関数はクロスエントロピーを使っていきます
+model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+31/10:
+# 繰り返しの回数を決めます
+NUM_EPOCHS = 5
+
+# モデルに対してデータを入れて演算を行っていきます
+model.fit(train_data, epochs=NUM_EPOCHS, validation_data=(validation_inputs, validation_targets), verbose =2)
+30/31:
+import numpy as np
+import tensorflow as tf
+import tensorflow_datasets as tfds
+30/32:
+#as_supervisedは正解データも持ってくる。
+mnist_dataset,mnist_info=tfds.load(name='mnist',with_info=True,as_supervised=True)
+mnist_info
+30/33:
+mnist_train, mnist_test = mnist_dataset['train'],mnist_dataset['test']
+#検証用は自分で指定する(10%をそうする。)
+num_validation_samples= 0.1*mnist_info.splits['train'].num_examples
+num_validation_samples=tf.cast(num_validation_samples,tf.int64)
+num_test_samples=mnist_info.splits['test'].num_examples
+num_test_samples = tf.cast(num_test_samples,tf.int64)
+#feature scaling(0~1にする)
+def scale(image, label):
+    image = tf.cast(image,tf.float32)
+    image /= 255
+    return image,label
+scaled_train_and_validation_data=mnist_train.map(scale)
+test_data = mnist_test.map(scale)
+30/34:
+# 指定した数ごとにシャッフルをする(メモリ過多を防ぐ)
+BUFFER_SIZE = 10000
+shuffled_train_and_validation_data = scaled_train_and_validation_data.shuffle(BUFFER_SIZE)
+30/35:
+validation_data = shuffled_train_and_validation_data.take(num_validation_samples)
+#skip内に記述することでvalidationdataの中に入っているデータを取り除くことができる。
+train_data = shuffled_train_and_validation_data.skip(num_validation_samples)
+30/36:
+BATCH_SIZE = 100
+#訓練はバックプロパゲーションが計算量多いため100ずつ行うが、testと検証用はフォワードプロパゲーションのみなのでバッチ処理の必要なし
+train_data = train_data.batch(BATCH_SIZE)
+validatioin_data=validation_data.batch(num_validation_samples)
+test_data = test_data.batch(num_test_samples)
+#検証用はinputとターゲットを分ける。
+validation_inputs,validation_targets = next(iter(validation_data))
+30/37:
+input_size = 784
+output_size = 10
+hidden_layer_size = 50
+
+model = tf.keras.Sequential([
+    tf.keras.layers.Flatten(input_shape = (28,28,1)),
+    #隠れ層の計算(重みをかけ、バイアスをたす操作)
+    tf.keras.layers.Dense(hidden_layer_size,activation='relu'),
+    tf.keras.layers.Dense(hidden_layer_size,activation='relu'),
+    tf.keras.layers.Dense(output_size,activation='softmax')
+])
+30/38:
+#最適化アルゴリズムはadam,データのエンコーディングはワンホットエンコーディング、計算の途中で出していきたい値は正確性。
+model.compile(optimizer='adam',loss = 'sparse_categorical_crossentropy',metrics=['accuracy'])
+30/39:
+NUM_EPOCHS = 5
+VALIDATION_STEPS = num_validation_samples
+model.fit(train_data,epochs = NUM_EPOCHS,validation_data=(validation_inputs,validation_targets),validation_steps=VALIDATION_STEPS,verbose=2)
+30/40:
+NUM_EPOCHS = 5
+VALIDATION_STEPS = num_validation_samples
+model.fit(train_data,epochs = NUM_EPOCHS,validation_data=(validation_inputs,validation_targets),verbose=2)
+30/41:
+NUM_EPOCHS = 5
+VALIDATION_STEPS = num_validation_samples
+model.fit(train_data,epochs = NUM_EPOCHS, validation_data = (validation_inputs, validation_targets),validation_steps=VALIDATION_STEPS,verbose=2)
+30/42:
+NUM_EPOCHS = 5
+VALIDATION_STEPS = num_validation_samples
+model.fit(train_data, epochs=NUM_EPOCHS, validation_data=(validation_inputs, validation_targets), verbose =2)
+30/43:
+mnist_train, mnist_test = mnist_dataset['train'],mnist_dataset['test']
+#検証用は自分で指定する(10%をそうする。)
+num_validation_samples= 0.1　*　mnist_info.splits['train'].num_examples
+num_validation_samples=tf.cast(num_validation_samples,tf.int64)
+num_test_samples=mnist_info.splits['test'].num_examples
+num_test_samples = tf.cast(num_test_samples,tf.int64)
+#feature scaling(0~1にする)
+def scale(image, label):
+    image = tf.cast(image,tf.float32)
+    image /= 255
+    return image,label
+scaled_train_and_validation_data=mnist_train.map(scale)
+test_data = mnist_test.map(scale)
+30/44:
+# 指定した数ごとにシャッフルをする(メモリ過多を防ぐ)
+BUFFER_SIZE = 10000
+shuffled_train_and_validation_data = scaled_train_and_validation_data.shuffle(BUFFER_SIZE)
+30/45:
+mnist_train, mnist_test = mnist_dataset['train'],mnist_dataset['test']
+#検証用は自分で指定する(10%をそうする。)
+num_validation_samples= 0.1*mnist_info.splits['train'].num_examples
+num_validation_samples=tf.cast(num_validation_samples,tf.int64)
+num_test_samples=mnist_info.splits['test'].num_examples
+num_test_samples = tf.cast(num_test_samples,tf.int64)
+#feature scaling(0~1にする)
+def scale(image, label):
+    image = tf.cast(image,tf.float32)
+    image /= 255
+    return image,label
+scaled_train_and_validation_data=mnist_train.map(scale)
+test_data = mnist_test.map(scale)
+30/46:
+# 指定した数ごとにシャッフルをする(メモリ過多を防ぐ)
+BUFFER_SIZE = 10000
+shuffled_train_and_validation_data = scaled_train_and_validation_data.shuffle(BUFFER_SIZE)
+30/47:
+validation_data = shuffled_train_and_validation_data.take(num_validation_samples)
+#skip内に記述することでvalidationdataの中に入っているデータを取り除くことができる。
+train_data = shuffled_train_and_validation_data.skip(num_validation_samples)
+30/48:
+BATCH_SIZE = 100
+#訓練はバックプロパゲーションが計算量多いため100ずつ行うが、testと検証用はフォワードプロパゲーションのみなのでバッチ処理の必要なし
+train_data = train_data.batch(BATCH_SIZE)
+validatioin_data=validation_data.batch(num_validation_samples)
+test_data = test_data.batch(num_test_samples)
+#検証用はinputとターゲットを分ける。
+validation_inputs,validation_targets = next(iter(validation_data))
+30/49:
+input_size = 784
+output_size = 10
+hidden_layer_size = 50
+
+model = tf.keras.Sequential([
+    tf.keras.layers.Flatten(input_shape = (28,28,1)),
+    #隠れ層の計算(重みをかけ、バイアスをたす操作)
+    tf.keras.layers.Dense(hidden_layer_size,activation='relu'),
+    tf.keras.layers.Dense(hidden_layer_size,activation='relu'),
+    tf.keras.layers.Dense(output_size,activation='softmax')
+])
+30/50:
+#最適化アルゴリズムはadam,データのエンコーディングはワンホットエンコーディング、計算の途中で出していきたい値は正確性。
+model.compile(optimizer='adam',loss = 'sparse_categorical_crossentropy',metrics=['accuracy'])
+30/51:
+NUM_EPOCHS = 5
+VALIDATION_STEPS = num_validation_samples
+model.fit(train_data,epochs = NUM_EPOCHS, validation_data = (validation_inputs, validation_targets),validation_steps=VALIDATION_STEPS,verbose=2)
+30/52:
+mnist_train, mnist_test = mnist_dataset['train'],mnist_dataset['test']
+#検証用は自分で指定する(10%をそうする。)
+num_validation_samples = 0.1 * mnist_info.splits['train'].num_examples
+num_validation_samples=tf.cast(num_validation_samples,tf.int64)
+num_test_samples=mnist_info.splits['test'].num_examples
+num_test_samples = tf.cast(num_test_samples,tf.int64)
+#feature scaling(0~1にする)
+def scale(image, label):
+    image = tf.cast(image,tf.float32)
+    image /= 255
+    return image,label
+scaled_train_and_validation_data=mnist_train.map(scale)
+test_data = mnist_test.map(scale)
+30/53:
+# 指定した数ごとにシャッフルをする(メモリ過多を防ぐ)
+BUFFER_SIZE = 10000
+shuffled_train_and_validation_data = scaled_train_and_validation_data.shuffle(BUFFER_SIZE)
+30/54:
+validation_data = shuffled_train_and_validation_data.take(num_validation_samples)
+#skip内に記述することでvalidationdataの中に入っているデータを取り除くことができる。
+train_data = shuffled_train_and_validation_data.skip(num_validation_samples)
+30/55:
+BATCH_SIZE = 100
+#訓練はバックプロパゲーションが計算量多いため100ずつ行うが、testと検証用はフォワードプロパゲーションのみなのでバッチ処理の必要なし
+train_data = train_data.batch(BATCH_SIZE)
+validatioin_data=validation_data.batch(num_validation_samples)
+test_data = test_data.batch(num_test_samples)
+#検証用はinputとターゲットを分ける。
+validation_inputs,validation_targets = next(iter(validation_data))
+30/56:
+input_size = 784
+output_size = 10
+hidden_layer_size = 50
+
+model = tf.keras.Sequential([
+    tf.keras.layers.Flatten(input_shape = (28,28,1)),
+    #隠れ層の計算(重みをかけ、バイアスをたす操作)
+    tf.keras.layers.Dense(hidden_layer_size,activation='relu'),
+    tf.keras.layers.Dense(hidden_layer_size,activation='relu'),
+    tf.keras.layers.Dense(output_size,activation='softmax')
+])
+30/57:
+#最適化アルゴリズムはadam,データのエンコーディングはワンホットエンコーディング、計算の途中で出していきたい値は正確性。
+model.compile(optimizer='adam',loss = 'sparse_categorical_crossentropy',metrics=['accuracy'])
+30/58:
+NUM_EPOCHS = 5
+VALIDATION_STEPS = num_validation_samples
+model.fit(train_data,epochs = NUM_EPOCHS, validation_data = (validation_inputs, validation_targets),validation_steps=VALIDATION_STEPS,verbose=2)
+30/59:
+import numpy as np
+import tensorflow as tf
+import tensorflow_datasets as tfds
+30/60:
+#as_supervisedは正解データも持ってくる。
+mnist_dataset, mnist_info = tfds.load(name='mnist', with_info=True, as_supervised=True)
+30/61:
+mnist_train, mnist_test = mnist_dataset['train'],mnist_dataset['test']
+#検証用は自分で指定する(10%をそうする。)
+num_validation_samples = 0.1 * mnist_info.splits['train'].num_examples
+num_validation_samples=tf.cast(num_validation_samples,tf.int64)
+num_test_samples=mnist_info.splits['test'].num_examples
+num_test_samples = tf.cast(num_test_samples,tf.int64)
+#feature scaling(0~1にする)
+def scale(image, label):
+    image = tf.cast(image,tf.float32)
+    image /= 255
+    return image,label
+scaled_train_and_validation_data=mnist_train.map(scale)
+test_data = mnist_test.map(scale)
+30/62:
+# 指定した数ごとにシャッフルをする(メモリ過多を防ぐ)
+BUFFER_SIZE = 10000
+shuffled_train_and_validation_data = scaled_train_and_validation_data.shuffle(BUFFER_SIZE)
+30/63:
+validation_data = shuffled_train_and_validation_data.take(num_validation_samples)
+#skip内に記述することでvalidationdataの中に入っているデータを取り除くことができる。
+train_data = shuffled_train_and_validation_data.skip(num_validation_samples)
+30/64:
+BATCH_SIZE = 100
+#訓練はバックプロパゲーションが計算量多いため100ずつ行うが、testと検証用はフォワードプロパゲーションのみなのでバッチ処理の必要なし
+train_data = train_data.batch(BATCH_SIZE)
+validatioin_data=validation_data.batch(num_validation_samples)
+test_data = test_data.batch(num_test_samples)
+#検証用はinputとターゲットを分ける。
+validation_inputs,validation_targets = next(iter(validation_data))
+30/65:
+input_size = 784
+output_size = 10
+hidden_layer_size = 50
+
+model = tf.keras.Sequential([
+    tf.keras.layers.Flatten(input_shape = (28,28,1)),
+    #隠れ層の計算(重みをかけ、バイアスをたす操作)
+    tf.keras.layers.Dense(hidden_layer_size,activation='relu'),
+    tf.keras.layers.Dense(hidden_layer_size,activation='relu'),
+    tf.keras.layers.Dense(output_size,activation='softmax')
+])
+30/66:
+#最適化アルゴリズムはadam,データのエンコーディングはワンホットエンコーディング、計算の途中で出していきたい値は正確性。
+model.compile(optimizer='adam',loss = 'sparse_categorical_crossentropy',metrics=['accuracy'])
+30/67:
+NUM_EPOCHS = 5
+VALIDATION_STEPS = num_validation_samples
+model.fit(train_data,epochs = NUM_EPOCHS, validation_data = (validation_inputs, validation_targets),validation_steps=VALIDATION_STEPS,verbose=2)
+30/68:
+#as_supervisedは正解データも持ってくる。
+mnist_dataset, mnist_info = tfds.load(name='mnist', with_info=True, as_supervised=True)
+30/69:
+mnist_train, mnist_test = mnist_dataset['train'], mnist_dataset['test']
+#検証用は自分で指定する(10%をそうする。)
+num_validation_samples = 0.1 * mnist_info.splits['train'].num_examples
+num_validation_samples = tf.cast(num_validation_samples, tf.int64)
+num_test_samples = mnist_info.splits['test'].num_examples
+num_test_samples = tf.cast(num_test_samples, tf.int64)
+#feature scaling(0~1にする)
+def scale(image, label):
+    # 数字が小数であることを確認します
+    image = tf.cast(image, tf.float32)
+    # 0と1の範囲におさめるため、255で割っていきます 
+    image /= 255.
+
+    return image, label
+scaled_train_and_validation_data = mnist_train.map(scale)
+
+# テストデータに関しても同様の変換を行っていきます
+test_data = mnist_test.map(scale)
+30/70:
+# 指定した数ごとにシャッフルをする(メモリ過多を防ぐ)
+BUFFER_SIZE = 10000
+shuffled_train_and_validation_data = scaled_train_and_validation_data.shuffle(BUFFER_SIZE)
+30/71:
+validation_data = shuffled_train_and_validation_data.take(num_validation_samples)
+#skip内に記述することでvalidationdataの中に入っているデータを取り除くことができる。
+train_data = shuffled_train_and_validation_data.skip(num_validation_samples)
+30/72:
+BATCH_SIZE = 100
+#訓練はバックプロパゲーションが計算量多いため100ずつ行うが、testと検証用はフォワードプロパゲーションのみなのでバッチ処理の必要なし
+train_data = train_data.batch(BATCH_SIZE)
+validatioin_data=validation_data.batch(num_validation_samples)
+test_data = test_data.batch(num_test_samples)
+#検証用はinputとターゲットを分ける。
+validation_inputs,validation_targets = next(iter(validation_data))
+30/73:
+input_size = 784
+output_size = 10
+hidden_layer_size = 50
+
+model = tf.keras.Sequential([
+    tf.keras.layers.Flatten(input_shape = (28,28,1)),
+    #隠れ層の計算(重みをかけ、バイアスをたす操作)
+    tf.keras.layers.Dense(hidden_layer_size,activation='relu'),
+    tf.keras.layers.Dense(hidden_layer_size,activation='relu'),
+    tf.keras.layers.Dense(output_size,activation='softmax')
+])
+30/74:
+#最適化アルゴリズムはadam,データのエンコーディングはワンホットエンコーディング、計算の途中で出していきたい値は正確性。
+model.compile(optimizer='adam',loss = 'sparse_categorical_crossentropy',metrics=['accuracy'])
+30/75:
+NUM_EPOCHS = 5
+VALIDATION_STEPS = num_validation_samples
+model.fit(train_data,epochs = NUM_EPOCHS, validation_data = (validation_inputs, validation_targets),validation_steps=VALIDATION_STEPS,verbose=2)
+30/76:
+#as_supervisedは正解データも持ってくる。
+mnist_dataset, mnist_info = tfds.load(name='mnist', with_info=True, as_supervised=True)
+30/77:
+mnist_train, mnist_test = mnist_dataset['train'], mnist_dataset['test']
+#検証用は自分で指定する(10%をそうする。)
+num_validation_samples = 0.1 * mnist_info.splits['train'].num_examples
+num_validation_samples = tf.cast(num_validation_samples, tf.int64)
+num_test_samples = mnist_info.splits['test'].num_examples
+num_test_samples = tf.cast(num_test_samples, tf.int64)
+#feature scaling(0~1にする)
+def scale(image, label):
+    # 数字が小数であることを確認します
+    image = tf.cast(image, tf.float32)
+    # 0と1の範囲におさめるため、255で割っていきます 
+    image /= 255.
+
+    return image, label
+scaled_train_and_validation_data = mnist_train.map(scale)
+
+# テストデータに関しても同様の変換を行っていきます
+test_data = mnist_test.map(scale)
+30/78:
+# 指定した数ごとにシャッフルをする(メモリ過多を防ぐ)
+BUFFER_SIZE = 10000
+shuffled_train_and_validation_data = scaled_train_and_validation_data.shuffle(BUFFER_SIZE)
+30/79:
+validation_data = shuffled_train_and_validation_data.take(num_validation_samples)
+#skip内に記述することでvalidationdataの中に入っているデータを取り除くことができる。
+train_data = shuffled_train_and_validation_data.skip(num_validation_samples)
+30/80:
+BATCH_SIZE = 100
+#訓練はバックプロパゲーションが計算量多いため100ずつ行うが、testと検証用はフォワードプロパゲーションのみなのでバッチ処理の必要なし
+train_data = train_data.batch(BATCH_SIZE)
+validation_data = validation_data.batch(num_validation_samples)
+test_data = test_data.batch(num_test_samples)
+
+#検証用はinputとターゲットを分ける。
+validation_inputs, validation_targets = next(iter(validation_data))
+30/81:
+input_size = 784
+output_size = 10
+hidden_layer_size = 50
+
+model = tf.keras.Sequential([
+    tf.keras.layers.Flatten(input_shape = (28,28,1)),
+    #隠れ層の計算(重みをかけ、バイアスをたす操作)
+    tf.keras.layers.Dense(hidden_layer_size,activation='relu'),
+    tf.keras.layers.Dense(hidden_layer_size,activation='relu'),
+    tf.keras.layers.Dense(output_size,activation='softmax')
+])
+30/82:
+#最適化アルゴリズムはadam,データのエンコーディングはワンホットエンコーディング、計算の途中で出していきたい値は正確性。
+model.compile(optimizer='adam',loss = 'sparse_categorical_crossentropy',metrics=['accuracy'])
+30/83:
+NUM_EPOCHS = 5
+VALIDATION_STEPS = num_validation_samples
+model.fit(train_data,epochs = NUM_EPOCHS, validation_data = (validation_inputs, validation_targets),validation_steps=VALIDATION_STEPS,verbose=2)
+30/84:
+BATCH_SIZE = 100
+#訓練はバックプロパゲーションが計算量多いため100ずつ行うが、testと検証用はフォワードプロパゲーションのみなのでバッチ処理の必要なし
+train_data = train_data.batch(BATCH_SIZE)
+validation_data = validation_data.batch(num_validation_samples)
+test_data = test_data.batch(num_test_samples)
+
+#検証用はinputとターゲットを分ける。
+validation_inputs,validation_targets = next(iter(validation_data))
+30/85:
+input_size = 784
+output_size = 10
+hidden_layer_size = 50
+
+model = tf.keras.Sequential([
+    tf.keras.layers.Flatten(input_shape = (28,28,1)),
+    #隠れ層の計算(重みをかけ、バイアスをたす操作)
+    tf.keras.layers.Dense(hidden_layer_size,activation='relu'),
+    tf.keras.layers.Dense(hidden_layer_size,activation='relu'),
+    tf.keras.layers.Dense(output_size,activation='softmax')
+])
+30/86:
+#最適化アルゴリズムはadam,データのエンコーディングはワンホットエンコーディング、計算の途中で出していきたい値は正確性。
+model.compile(optimizer='adam',loss = 'sparse_categorical_crossentropy',metrics=['accuracy'])
+30/87:
+NUM_EPOCHS = 5
+VALIDATION_STEPS = num_validation_samples
+model.fit(train_data,epochs = NUM_EPOCHS, validation_data = (validation_inputs, validation_targets),validation_steps=VALIDATION_STEPS,verbose=2)
+30/88:
+import numpy as np
+import tensorflow as tf
+import tensorflow_datasets as tfds
+30/89:
+#as_supervisedは正解データも持ってくる。
+mnist_dataset, mnist_info = tfds.load(name='mnist', with_info=True, as_supervised=True)
+30/90:
+mnist_train, mnist_test = mnist_dataset['train'], mnist_dataset['test']
+#検証用は自分で指定する(10%をそうする。)
+num_validation_samples = 0.1 * mnist_info.splits['train'].num_examples
+num_validation_samples = tf.cast(num_validation_samples, tf.int64)
+num_test_samples = mnist_info.splits['test'].num_examples
+num_test_samples = tf.cast(num_test_samples, tf.int64)
+#feature scaling(0~1にする)
+def scale(image, label):
+    # 数字が小数であることを確認します
+    image = tf.cast(image, tf.float32)
+    # 0と1の範囲におさめるため、255で割っていきます 
+    image /= 255.
+
+    return image, label
+scaled_train_and_validation_data = mnist_train.map(scale)
+
+# テストデータに関しても同様の変換を行っていきます
+test_data = mnist_test.map(scale)
+30/91:
+# 指定した数ごとにシャッフルをする(メモリ過多を防ぐ)
+BUFFER_SIZE = 10000
+shuffled_train_and_validation_data = scaled_train_and_validation_data.shuffle(BUFFER_SIZE)
+30/92:
+validation_data = shuffled_train_and_validation_data.take(num_validation_samples)
+#skip内に記述することでvalidationdataの中に入っているデータを取り除くことができる。
+train_data = shuffled_train_and_validation_data.skip(num_validation_samples)
+30/93:
+BATCH_SIZE = 100
+#訓練はバックプロパゲーションが計算量多いため100ずつ行うが、testと検証用はフォワードプロパゲーションのみなのでバッチ処理の必要なし
+train_data = train_data.batch(BATCH_SIZE)
+validation_data = validation_data.batch(num_validation_samples)
+test_data = test_data.batch(num_test_samples)
+
+#検証用はinputとターゲットを分ける。
+validation_inputs, validation_targets = next(iter(validation_data))
+30/94:
+input_size = 784
+output_size = 10
+hidden_layer_size = 50
+
+model = tf.keras.Sequential([
+    tf.keras.layers.Flatten(input_shape = (28,28,1)),
+    #隠れ層の計算(重みをかけ、バイアスをたす操作)
+    tf.keras.layers.Dense(hidden_layer_size,activation='relu'),
+    tf.keras.layers.Dense(hidden_layer_size,activation='relu'),
+    tf.keras.layers.Dense(output_size,activation='softmax')
+])
+30/95:
+#最適化アルゴリズムはadam,データのエンコーディングはワンホットエンコーディング、計算の途中で出していきたい値は正確性。
+model.compile(optimizer='adam',loss = 'sparse_categorical_crossentropy',metrics=['accuracy'])
+30/96:
+NUM_EPOCHS = 5
+VALIDATION_STEPS = num_validation_samples
+model.fit(train_data,epochs = NUM_EPOCHS, validation_data = (validation_inputs, validation_targets),validation_steps=VALIDATION_STEPS,verbose=2)
+30/97: test_loss, test_accuracy = mode.evaluate(test_data)
+30/98: test_loss, test_accuracy = model.evaluate(test_data)
+30/99: test_loss, test_accuracy
+34/1:
+import numpy as np
+from sklearn import preprocessing
+
+raw_csv_data = np.loadtxt('Audiobooks-data.csv',delimiter = ',')
+unscaled_inputs_all = raw_csv_data[:,1:-1]
+targets_all = raw_dsv_data[:,-1]
+34/2:
+import numpy as np
+from sklearn import preprocessing
+
+raw_csv_data = np.loadtxt('Audiobooks-data.csv',delimiter = ',')
+unscaled_inputs_all = raw_csv_data[:,1:-1]
+targets_all = raw_dsv_data[:,-1]
+34/3:
+import numpy as np
+from sklearn import preprocessing
+
+raw_csv_data = np.loadtxt('Audiobooks-data.csv',delimiter = ',')
+unscaled_inputs_all = raw_csv_data[:,1:-1]
+targets_all = raw_csv_data[:,-1]
+35/1:
+#バランシング
+num_one_targets = int(np.sum(targets_all))
+zero_targets_counter = 0
+indices_to_remove = []
+
+for i in range(targets_all.shape[0]):
+    if targets_all[i]==0:
+        zero_targets_counter += 1
+        if zero_targets_counter > num_one_targets:
+            indices_to_remove.append(i)
+            
+unscaled_inputs_equal_priors = np.delete(unscaled_inputs_all,indices_to_remove,axis = 0)
+targets_equal_priors = np.delete(targets_all,indices_to_remove,axis = 0)
+35/2:
+import numpy as np
+from sklearn import preprocessing
+
+raw_csv_data = np.loadtxt('Audiobooks-data.csv',delimiter = ',')
+unscaled_inputs_all = raw_csv_data[:,1:-1]
+targets_all = raw_csv_data[:,-1]
+35/3:
+#バランシング
+num_one_targets = int(np.sum(targets_all))
+zero_targets_counter = 0
+indices_to_remove = []
+
+for i in range(targets_all.shape[0]):
+    if targets_all[i]==0:
+        zero_targets_counter += 1
+        if zero_targets_counter > num_one_targets:
+            indices_to_remove.append(i)
+            
+unscaled_inputs_equal_priors = np.delete(unscaled_inputs_all,indices_to_remove,axis = 0)
+targets_equal_priors = np.delete(targets_all,indices_to_remove,axis = 0)
+35/4:
+import numpy as np
+from sklearn import preprocessing
+
+raw_csv_data = np.loadtxt('Audiobooks-data.csv',delimiter = ',')
+unscaled_inputs_all = raw_csv_data[:,1:-1]
+targets_all = raw_csv_data[:,-1]
+unscaled_inputs_all
+35/5:
+#バランシング
+num_one_targets = int(np.sum(targets_all))
+zero_targets_counter = 0
+indices_to_remove = []
+
+for i in range(targets_all.shape[0]):
+    if targets_all[i]==0:
+        zero_targets_counter += 1
+        if zero_targets_counter > num_one_targets:
+            indices_to_remove.append(i)
+            
+unscaled_inputs_equal_priors = np.delete(unscaled_inputs_all,indices_to_remove,axis = 0)
+targets_equal_priors = np.delete(targets_all,indices_to_remove,axis = 0)
+unscaled_inputs_all
+35/6:
+#バランシング
+num_one_targets = int(np.sum(targets_all))
+zero_targets_counter = 0
+indices_to_remove = []
+
+for i in range(targets_all.shape[0]):
+    if targets_all[i]==0:
+        zero_targets_counter += 1
+        if zero_targets_counter > num_one_targets:
+            indices_to_remove.append(i)
+            
+unscaled_inputs_equal_priors = np.delete(unscaled_inputs_all,indices_to_remove,axis = 0)
+targets_equal_priors = np.delete(targets_all,indices_to_remove,axis = 0)
+targets_equal_priors
+35/7:
+import numpy as np
+from sklearn import preprocessing
+
+raw_csv_data = np.loadtxt('Audiobooks-data.csv',delimiter = ',')
+unscaled_inputs_all = raw_csv_data[:,1:-1]
+targets_all = raw_csv_data[:,-1]
+targets_all
+35/8:
+#バランシング(targetが0と1の量が揃うように調整、具体的には0の数が1の数を超えたらそれ以降の0のデータを全て消す。)
+num_one_targets = int(np.sum(targets_all))
+zero_targets_counter = 0
+indices_to_remove = []
+
+for i in range(targets_all.shape[0]):
+    if targets_all[i]==0:
+        zero_targets_counter += 1
+        if zero_targets_counter > num_one_targets:
+            indices_to_remove.append(i)
+            
+unscaled_inputs_equal_priors = np.delete(unscaled_inputs_all,indices_to_remove,axis = 0)
+targets_equal_priors = np.delete(targets_all,indices_to_remove,axis = 0)
+targets_equal_priors
+35/9:
+#標準化(データの影響の大きさを同じにする)
+scaled_inputs = preprocessing.scale(unscaled_inputs_equal_priors)
+35/10:
+#シャッフル(バッチ処理をするため、処理ごとに特定のデータが集中してしまうことを避ける。)
+suffled_indices = np.arrange(scaled_inputs.shape[0])
+np.random.shuffle(shuffled_indices)
+shuffled_in@uts = scsaled
+35/11:
+#シャッフル(バッチ処理をするため、処理ごとに特定のデータが集中してしまうことを避ける。)
+suffled_indices = np.arrange(scaled_inputs.shape[0])
+np.random.shuffle(shuffled_indices)
+shuffled_inputs = scaled_inputs[shuffled_indices]
+shuffled_targets = targets_equal_priors[shuffled_indices]
+35/12:
+#シャッフル(バッチ処理をするため、処理ごとに特定のデータが集中してしまうことを避ける。)
+suffled_indices = np.arange(scaled_inputs.shape[0])
+np.random.shuffle(shuffled_indices)
+shuffled_inputs = scaled_inputs[shuffled_indices]
+shuffled_targets = targets_equal_priors[shuffled_indices]
+35/13:
+#シャッフル(バッチ処理をするため、処理ごとに特定のデータが集中してしまうことを避ける。)
+shuffled_indices = np.arange(scaled_inputs.shape[0])
+np.random.shuffle(shuffled_indices)
+shuffled_inputs = scaled_inputs[shuffled_indices]
+shuffled_targets = targets_equal_priors[shuffled_indices]
+35/14:
+#訓練用、検証用、テスト用に分割_count
+samples_count = shuffled_inputs.shape[0]
+train_samples_count = int(0.8*samples_count)
+validation_samples_count = int(0.1*samples_count)
+test_samplescount = samples_count -train_samples_count - validation_samples_count
+35/15:
+#訓練用、検証用、テスト用に分割_count
+samples_count = shuffled_inputs.shape[0]
+train_samples_count = int(0.8*samples_count)
+validation_samples_count = int(0.1*samples_count)
+test_samples_count = samples_count -train_samples_count - validation_samples_count
+train_inputs = shuffled_inputs[:train_samples_count]
+train_targets = shuffled_targets[:train_samples_count]
+validation_inputs = shuffled_inputs[train_samples_count:train_samples_count+validation_samples_count]
+validation_targets = shuffled_targets[train_samples_count:train_samples_count+validation_samples_count]
+35/16:
+#訓練用、検証用、テスト用に分割_count
+samples_count = shuffled_inputs.shape[0]
+train_samples_count = int(0.8*samples_count)
+validation_samples_count = int(0.1*samples_count)
+test_samples_count = samples_count -train_samples_count - validation_samples_count
+
+train_inputs = shuffled_inputs[:train_samples_count]
+train_targets = shuffled_targets[:train_samples_count]
+
+validation_inputs = shuffled_inputs[train_samples_count:train_samples_count+validation_samples_count]
+validation_targets = shuffled_targets[train_samples_count:train_samples_count+validation_samples_count]
+
+test_inputs = shuffled_inputs[train_samples_count+validation_samples_count:]
+test_targets = shuffled_targets[train_samples_count+validation_samples_count:]
+
+print(np.sum(train_targets),train_samples_count,np.sum(train_targets)/train_samples_count)
+print(np.sum(validation_targets),train_samples_count,np.sum(validation_targets)/validation_samples_count)
+print(np.sum(test_targets),test_samples_count,np.sum(test_targets)/test_samples_count)
+36/1:
+input_size = 10
+output_size = 2
+# 隠れ層のユニットの数を定義します
+hidden_layer_size = 50
+    
+# モデルの定義を進めていきます
+model = tf.keras.Sequential([    
+    tf.keras.layers.Dense(hidden_layer_size, activation='relu'), # 1番目の隠れ層
+    tf.keras.layers.Dense(hidden_layer_size, activation='relu'), # 2番目の隠れ層
+    tf.keras.layers.Dense(output_size, activation='softmax') # 出力層
+])
+model.compile(optimize='adam', loss='sparse_categorical_crossentropy',metrics = ['accuracy'])
+batch_size = 100
+max_epochs = 100
+model.fit(train_inputs,
+          train_targets,
+          batch_size = batch_size,
+          epochs =max_epochs,
+          validation_data = (validation_inputs,validation_targets),
+          verbose = 2)
+36/2:
+import numpy as np
+from sklearn import preprocessing
+
+raw_csv_data = np.loadtxt('Audiobooks-data.csv',delimiter = ',')
+unscaled_inputs_all = raw_csv_data[:,1:-1]
+targets_all = raw_csv_data[:,-1]
+36/3:
+#バランシング(targetが0と1の量が揃うように調整、具体的には0の数が1の数を超えたらそれ以降の0のデータを全て消す。)
+num_one_targets = int(np.sum(targets_all))
+zero_targets_counter = 0
+indices_to_remove = []
+
+for i in range(targets_all.shape[0]):
+    if targets_all[i]==0:
+        zero_targets_counter += 1
+        if zero_targets_counter > num_one_targets:
+            indices_to_remove.append(i)
+            
+unscaled_inputs_equal_priors = np.delete(unscaled_inputs_all,indices_to_remove,axis = 0)
+targets_equal_priors = np.delete(targets_all,indices_to_remove,axis = 0)
+36/4:
+#標準化(データの影響の大きさを同じにする)
+scaled_inputs = preprocessing.scale(unscaled_inputs_equal_priors)
+36/5:
+#シャッフル(バッチ処理をするため、処理ごとに特定のデータが集中してしまうことを避ける。)
+shuffled_indices = np.arange(scaled_inputs.shape[0])
+np.random.shuffle(shuffled_indices)
+shuffled_inputs = scaled_inputs[shuffled_indices]
+shuffled_targets = targets_equal_priors[shuffled_indices]
+36/6:
+#訓練用、検証用、テスト用に分割_count
+samples_count = shuffled_inputs.shape[0]
+train_samples_count = int(0.8*samples_count)
+validation_samples_count = int(0.1*samples_count)
+test_samples_count = samples_count -train_samples_count - validation_samples_count
+
+train_inputs = shuffled_inputs[:train_samples_count]
+train_targets = shuffled_targets[:train_samples_count]
+
+validation_inputs = shuffled_inputs[train_samples_count:train_samples_count+validation_samples_count]
+validation_targets = shuffled_targets[train_samples_count:train_samples_count+validation_samples_count]
+
+test_inputs = shuffled_inputs[train_samples_count+validation_samples_count:]
+test_targets = shuffled_targets[train_samples_count+validation_samples_count:]
+#大体0と1が半々になっていると良い。
+print(np.sum(train_targets),train_samples_count,np.sum(train_targets)/train_samples_count)
+print(np.sum(validation_targets),train_samples_count,np.sum(validation_targets)/validation_samples_count)
+print(np.sum(test_targets),test_samples_count,np.sum(test_targets)/test_samples_count)
+36/7:
+#データ保存
+np.savez('Audiobooks_data_train',inputs = train_inputs,targets = train_targets)
+np.savez('Audiobooks_data_validation',inputs = validation_inputs,targets = validation_targets)
+np.savez('Audiobooks_data_test',inputs = test_inputs,targets = test_targets)
+36/8:
+import tensorflow as tf
+
+input_size = 10
+output_size = 2
+# 隠れ層のユニットの数を定義します
+hidden_layer_size = 50
+    
+# モデルの定義を進めていきます
+model = tf.keras.Sequential([    
+    tf.keras.layers.Dense(hidden_layer_size, activation='relu'), # 1番目の隠れ層
+    tf.keras.layers.Dense(hidden_layer_size, activation='relu'), # 2番目の隠れ層
+    tf.keras.layers.Dense(output_size, activation='softmax') # 出力層
+])
+model.compile(optimize='adam', loss='sparse_categorical_crossentropy',metrics = ['accuracy'])
+batch_size = 100
+max_epochs = 100
+model.fit(train_inputs,
+          train_targets,
+          batch_size = batch_size,
+          epochs =max_epochs,
+          validation_data = (validation_inputs,validation_targets),
+          verbose = 2)
+36/9:
+import tensorflow as tf
+
+input_size = 10
+output_size = 2
+# 隠れ層のユニットの数を定義します
+hidden_layer_size = 50
+    
+# モデルの定義を進めていきます
+model = tf.keras.Sequential([    
+    tf.keras.layers.Dense(hidden_layer_size, activation='relu'), # 1番目の隠れ層
+    tf.keras.layers.Dense(hidden_layer_size, activation='relu'), # 2番目の隠れ層
+    tf.keras.layers.Dense(output_size, activation='softmax') # 出力層
+])
+model.compile(optimizer='adam', loss='sparse_categorical_crossentropy',metrics = ['accuracy'])
+batch_size = 100
+max_epochs = 100
+model.fit(train_inputs,
+          train_targets,
+          batch_size = batch_size,
+          epochs =max_epochs,
+          validation_data = (validation_inputs,validation_targets),
+          verbose = 2)
+38/1:
+import tensorflow as tf
+
+input_size = 10
+output_size = 2
+# 隠れ層のユニットの数を定義します
+hidden_layer_size = 50
+    
+# モデルの定義を進めていきます
+model = tf.keras.Sequential([    
+    tf.keras.layers.Dense(hidden_layer_size, activation='relu'), # 1番目の隠れ層
+    tf.keras.layers.Dense(hidden_layer_size, activation='relu'), # 2番目の隠れ層
+    tf.keras.layers.Dense(output_size, activation='softmax') # 出力層
+])
+#損失が上がったり下がったりしているのでアーリーストッピングが必要
+model.compile(optimizer='adam', loss='sparse_categorical_crossentropy',metrics = ['accuracy'])
+batch_size = 100
+max_epochs = 100
+#損失関数が1回増えてしまっても繰り返す。
+early_stopping  = tf.keras.callbacks.EarlyStopping(patience =2)
+model.fit(train_inputs,
+          train_targets,
+          batch_size = batch_size,
+          epochs =max_epochs,
+          validation_data = (validation_inputs,validation_targets),
+          callbacks = [early_stopping],
+          verbose = 2)
+38/2:
+import numpy as np
+from sklearn import preprocessing
+
+raw_csv_data = np.loadtxt('Audiobooks-data.csv',delimiter = ',')
+unscaled_inputs_all = raw_csv_data[:,1:-1]
+targets_all = raw_csv_data[:,-1]
+38/3:
+#バランシング(targetが0と1の量が揃うように調整、具体的には0の数が1の数を超えたらそれ以降の0のデータを全て消す。)
+num_one_targets = int(np.sum(targets_all))
+zero_targets_counter = 0
+indices_to_remove = []
+
+for i in range(targets_all.shape[0]):
+    if targets_all[i]==0:
+        zero_targets_counter += 1
+        if zero_targets_counter > num_one_targets:
+            indices_to_remove.append(i)
+            
+unscaled_inputs_equal_priors = np.delete(unscaled_inputs_all,indices_to_remove,axis = 0)
+targets_equal_priors = np.delete(targets_all,indices_to_remove,axis = 0)
+38/4:
+#標準化(データの影響の大きさを同じにする)
+scaled_inputs = preprocessing.scale(unscaled_inputs_equal_priors)
+38/5:
+#シャッフル(バッチ処理をするため、処理ごとに特定のデータが集中してしまうことを避ける。)
+shuffled_indices = np.arange(scaled_inputs.shape[0])
+np.random.shuffle(shuffled_indices)
+shuffled_inputs = scaled_inputs[shuffled_indices]
+shuffled_targets = targets_equal_priors[shuffled_indices]
+38/6:
+#訓練用、検証用、テスト用に分割_count
+samples_count = shuffled_inputs.shape[0]
+train_samples_count = int(0.8*samples_count)
+validation_samples_count = int(0.1*samples_count)
+test_samples_count = samples_count -train_samples_count - validation_samples_count
+
+train_inputs = shuffled_inputs[:train_samples_count]
+train_targets = shuffled_targets[:train_samples_count]
+
+validation_inputs = shuffled_inputs[train_samples_count:train_samples_count+validation_samples_count]
+validation_targets = shuffled_targets[train_samples_count:train_samples_count+validation_samples_count]
+
+test_inputs = shuffled_inputs[train_samples_count+validation_samples_count:]
+test_targets = shuffled_targets[train_samples_count+validation_samples_count:]
+#大体0と1が半々になっていると良い。
+print(np.sum(train_targets),train_samples_count,np.sum(train_targets)/train_samples_count)
+print(np.sum(validation_targets),train_samples_count,np.sum(validation_targets)/validation_samples_count)
+print(np.sum(test_targets),test_samples_count,np.sum(test_targets)/test_samples_count)
+38/7:
+#データ保存
+np.savez('Audiobooks_data_train',inputs = train_inputs,targets = train_targets)
+np.savez('Audiobooks_data_validation',inputs = validation_inputs,targets = validation_targets)
+np.savez('Audiobooks_data_test',inputs = test_inputs,targets = test_targets)
+38/8:
+import tensorflow as tf
+
+input_size = 10
+output_size = 2
+# 隠れ層のユニットの数を定義します
+hidden_layer_size = 50
+    
+# モデルの定義を進めていきます
+model = tf.keras.Sequential([    
+    tf.keras.layers.Dense(hidden_layer_size, activation='relu'), # 1番目の隠れ層
+    tf.keras.layers.Dense(hidden_layer_size, activation='relu'), # 2番目の隠れ層
+    tf.keras.layers.Dense(output_size, activation='softmax') # 出力層
+])
+#損失が上がったり下がったりしているのでアーリーストッピングが必要
+model.compile(optimizer='adam', loss='sparse_categorical_crossentropy',metrics = ['accuracy'])
+batch_size = 100
+max_epochs = 100
+#損失関数が1回増えてしまっても繰り返す。
+early_stopping  = tf.keras.callbacks.EarlyStopping(patience =2)
+model.fit(train_inputs,
+          train_targets,
+          batch_size = batch_size,
+          epochs =max_epochs,
+          validation_data = (validation_inputs,validation_targets),
+          callbacks = [early_stopping],
+          verbose = 2)
+38/9:
+#モデルのテスト
+test_loss, test_accuracy = modelmodel.evaluate(test_inputs, test_targets)
+38/10:
+#モデルのテスト
+test_loss, test_accuracy = model.evaluate(test_inputs, test_targets)
+38/11: test_loss, test_accuracy
+40/1: import pandas as pd
+40/2: raw_csv_data = pd.read_csv('Absenteeism-data.csv')
+40/3: import pandas as pd
+40/4: raw_csv_data = pd.read_csv('Absenteeism-data.csv')
+41/1: df = raw_csv_data.copy()
+41/2: import pandas as pd
+41/3: raw_csv_data = pd.read_csv('Absenteeism-data.csv')
+41/4: df = raw_csv_data.copy()
+41/5:
+df = raw_csv_data.copy()
+pd.options.display.max_columns = None
+pd.options.display.max_rows = None
+df
+41/6: df.info()
+43/1:
+#まず不要なデータを削除(ここではIDは重要ではないため(回帰分析においては邪魔。)削除。)axis = 0(default)はたてで探す。
+# axis = 1 は横(ID,Reason for absence,etc...)で探す。
+df.drop(['ID'],axis = 1)
+43/2: import pandas as pd
+43/3: raw_csv_data = pd.read_csv('Absenteeism-data.csv')
+43/4:
+df = raw_csv_data.copy()
+pd.options.display.max_columns = None
+pd.options.display.max_rows = None
+df
+43/5:
+#欠損値なし
+df.info()
+43/6:
+#まず不要なデータを削除(ここではIDは重要ではないため(回帰分析においては邪魔。)削除。)axis = 0(default)はたてで探す。
+# axis = 1 は横(ID,Reason for absence,etc...)で探す。
+df.drop(['ID'],axis = 1)
+43/7:
+df = df.drop(['ID'],axis = 1)
+df
+43/8:
+#まずは全部見るのは大変なので最小値を見る
+df['Reason for Absence'].min()
+df['Reason for Absence'].max()
+43/9: sorted(df['Reason for Absence'].unique())
+43/10:
+#欠勤理由はカテゴリ変数なのでダミー変数に変えないと予期せぬ相互作用を招く恐れがある。
+reason_columns = pd.get_dummies(df.['Reason for Absence'])
+reason_columns
+43/11:
+#欠勤理由はカテゴリ変数なのでダミー変数に変えないと予期せぬ相互作用を招く恐れがある。
+reason_columns = pd.get_dummies(df['Reason for Absence'])
+reason_columns
+43/12:
+reason_columns['check']=reason_columns.sum(axis= 1)
+reason_columns
+43/13:
+#0がないか？
+reason_columns['check'].unique()
+43/14: reason_columns = reason_columns.drop(['check'],axis = 1)
+43/15: reason_columns
+43/16:
+checkはいらないので消きょ
+reason_columns = reason_columns.drop(['check'],axis = 1)
+43/17:
+checkはいらないので消きょ
+reason_columns = reason_columns.drop(['check'],axis = 1)
+43/18:
+# checkはいらないので消きょ
+reason_columns = reason_columns.drop(['check'],axis = 1)
+43/19:
+#0がないか？
+reason_columns['check'].unique()
+43/20: import pandas as pd
+43/21: raw_csv_data = pd.read_csv('Absenteeism-data.csv')
+43/22:
+df = raw_csv_data.copy()
+pd.options.display.max_columns = None
+pd.options.display.max_rows = None
+df
+43/23:
+#欠損値なし
+df.info()
+43/24:
+#まず不要なデータを削除(ここではIDは重要ではないため(回帰分析においては邪魔。)削除。)axis = 0(default)はたてで探す。
+# axis = 1 は横(ID,Reason for absence,etc...)で探す。
+#しかしこれは一時的に消すものなのでdfを上書きする必要あり。
+df.drop(['ID'],axis = 1)
+43/25:
+df = df.drop(['ID'],axis = 1)
+df
+43/26:
+#まずは全部見るのは大変なので最小値を見る
+df['Reason for Absence'].min()
+df['Reason for Absence'].max()
+43/27:
+sorted(df['Reason for Absence'].unique())
+#データの数はlen(xxx)
+43/28:
+#欠勤理由はカテゴリ変数なのでダミー変数に変えないと予期せぬ相互作用を招く恐れがある。
+reason_columns = pd.get_dummies(df['Reason for Absence'])
+reason_columns
+43/29:
+#ちゃんと欠損値がないか確認するcheckを追加する。
+reason_columns['check']=reason_columns.sum(axis= 1)
+reason_columns
+43/30:
+#0がないか？
+reason_columns['check'].unique()
+43/31:
+# checkはいらないので消きょ
+reason_columns = reason_columns.drop(['check'],axis = 1)
+43/32: reason_columns
+43/33:
+#多重共線性(ある一つの変数が他の変数によって説明がついてしまう状態)を回避するためにnこに対しn-1このダミー変数にする。
+reason_columns = pd.get_dummies(df['Reason for Absence'],drop_first = True)
+reason_columns
+43/34:
+#欠勤の理由がほぼ似ているものはグループ化する。
+df.columns.values
+43/35:
+df = df.drop(['Reason for Absence'],axis = 1)
+df
+43/36: reason_columns.loc[:,1:14]
+43/37: reason_columns.loc[:,1:14].max(axis = 1)
+43/38:
+reason_type1= reason_columns.loc[:,1:14].max(axis= 1)
+reason_type2= reason_columns.loc[:,15:17].max(axis= 1)
+reason_type3= reason_columns.loc[:,18:21].max(axis= 1)
+reason_type4= reason_columns.loc[:,22:].max(axis= 1)
+43/39: reason_type2
+43/40:
+df = pd.concat([df,reason_type_1,reason_type_2,reason_type_3,reason_type_4],axis = 1)
+df
+43/41:
+df = pd.concat([df,reason_type1,reason_type2,reason_type3,reason_type4],axis = 1)
+df
+43/42:
+# これから名前を書き換えるためのコピペ用
+df.columns.values
+43/43:
+column_names = ['Date', 'Transportation Expense', 'Distance to Work', 'Age',
+       'Daily Work Load Average', 'Body Mass Index', 'Education',
+       'Children', 'Pets', 'Absenteeism Time in Hours', 'Reason_1', 'Reason_2', 'Reason_3','Reason_4']
+43/44: df.columns = column_names
+43/45: df
+43/46:
+columns_names_reordered = ['Reason_1', 'Reason_2', 'Reason_3','Reason_4','Date', 'Transportation Expense', 'Distance to Work', 'Age',
+       'Daily Work Load Average', 'Body Mass Index', 'Education',
+       'Children', 'Pets', 'Absenteeism Time in Hours']
+43/47:
+#データ並び替えを行います。
+columns_names_reordered = ['Reason_1', 'Reason_2', 'Reason_3','Reason_4','Date', 'Transportation Expense', 'Distance to Work', 'Age',
+       'Daily Work Load Average', 'Body Mass Index', 'Education',
+       'Children', 'Pets', 'Absenteeism Time in Hours']
+43/48: df = df[columns_names_reordered]
+43/49:
+#データの保存(チェックポイント的な意味合い)
+df_reason_mod = df.copy()
+43/50:
+#日付のデータ型は？
+type(df_reason_mod['Date'][0])
+43/51:
+df_reason_mod['Date'] = pd.to_datetime(df_reason_mod['Date'])
+df_reason_mod['Date']
+43/52:
+df_reason_mod['Date'] = pd.to_datetime(df_reason_mod['Date'], format = '%d/%m/%Y')
+df_reason_mod['Date']
+43/53:
+df_reason_mod['Date'] = pd.to_datetime(df_reason_mod['Date'], format = '%d/%m/%Y')
+type(df_reason_mod['Date'][0])
+43/54:
+# str=>datetime
+df_reason_mod['Date'] = pd.to_datetime(df_reason_mod['Date'])
+df_reason_mod['Date']
+type(df_reason_mod['Date'][0])
+43/55:
+# str=>datetime
+df_reason_mod['Date'] = pd.to_datetime(df_reason_mod['Date'])
+df_reason_mod['Date']
+43/56:
+df_reason_mod['Date'] = pd.to_datetime(df_reason_mod['Date'], format = '%d/%m/%Y')
+type(df_reason_mod['Date'][0])
+43/57: df_reason_mod.info()
+43/58:
+#月のデータを抽出する
+list_months = []
+for i in range(df_reason_mod.shape[0]):
+    list_month.append(df_reason_mod['Date'][i].month)
+len(list_month)
+43/59:
+#月のデータを抽出する
+list_months = []
+for i in range(df_reason_mod.shape[0]):
+    list_month.append(df_reason_mod['Date'][i].month)
+len(list_months)
+43/60:
+#月のデータを抽出する
+list_months = []
+for i in range(df_reason_mod.shape[0]):
+    list_months.append(df_reason_mod['Date'][i].month)
+len(list_months)
+43/61: df_reason_mod['Month Value']=list_months
+43/62:
+#曜日のデータを抽出する
+def date_to_weekdat(date_value):
+    return date_value.weekday()
+43/63: df_reason_mod['Day of the Week'] = df_reason_mod['Date'].apply(date_to_weekday)
+43/64:
+#曜日のデータを抽出する
+def date_to_weekday(date_value):
+    return date_value.weekday()
+43/65: df_reason_mod['Day of the Week'] = df_reason_mod['Date'].apply(date_to_weekday)
+43/66: df_reason_mod = df_reason_mod.drop(['Date'],axis = 1)
+43/67:
+#いるデータの確認
+df_reason_mod
+43/68: df_reason_mod.columns.values
+43/69:
+columns_names_upd=['Reason_1', 'Reason_2', 'Reason_3', 'Reason_4', 'Month Value',
+       'Day of the Week',
+       'Transportation Expense', 'Distance to Work', 'Age',
+       'Daily Work Load Average', 'Body Mass Index', 'Education',
+       'Children', 'Pets', 'Absenteeism Time in Hours']
+43/70:
+df_reason_mod = df_reason_mod[columns_names_upd]
+df_reason_mod
+43/71: df_reason_mod['Education'].unique()
+43/72: df_reason_mod['Education'].value_counts
+43/73: df_reason_mod['Education'].value_counts()
+43/74: df_reason_mod['Education']=df_reason_mod['Education'].map({1:0,2:1,3:1,4:1})
+43/75:
+#高卒以下、大卒以上で分ける（大卒以上はあまり違いなさそうという直感的判断より。
+df_reason_mod['Education']=df_reason_mod['Education'].map({1:0,2:1,3:1,4:1})
+43/76: df_reason_mod['Education'].value_counts()
+43/77:
+#高卒以下、大卒以上で分ける（大卒以上はあまり違いなさそうという直感的判断より。
+df_reason_mod['Education']=df_reason_mod['Education'].map({1:0,2:1,3:1,4:1})
+df_reason_mod['Education'].unique()
+43/78:
+#謎データを読み解く(1は高卒、2~４は学部、修士、博士らしい)
+df_reason_mod['Education'].unique()
+43/79: df_reason_mod['Day of the Week'] = df_reason_mod['Date'].apply(date_to_weekday)
+43/80: df_reason_mod = df_reason_mod.drop(['Date'],axis = 1)
+43/81: import pandas as pd
+43/82: raw_csv_data = pd.read_csv('Absenteeism-data.csv')
+43/83:
+df = raw_csv_data.copy()
+pd.options.display.max_columns = None
+pd.options.display.max_rows = None
+df
+43/84:
+#欠損値なし
+df.info()
+43/85:
+#まず不要なデータを削除(ここではIDは重要ではないため(回帰分析においては邪魔。)削除。)axis = 0(default)はたてで探す。
+# axis = 1 は横(ID,Reason for absence,etc...)で探す。
+#しかしこれは一時的に消すものなのでdfを上書きする必要あり。
+df.drop(['ID'],axis = 1)
+43/86:
+df = df.drop(['ID'],axis = 1)
+df
+43/87:
+#まずは全部見るのは大変なので最小値を見る
+df['Reason for Absence'].min()
+df['Reason for Absence'].max()
+43/88:
+sorted(df['Reason for Absence'].unique())
+#データの数はlen(xxx)
+43/89:
+#欠勤理由はカテゴリ変数なのでダミー変数に変えないと予期せぬ相互作用を招く恐れがある。
+reason_columns = pd.get_dummies(df['Reason for Absence'])
+reason_columns
+43/90:
+#ちゃんと欠損値がないか確認するcheckを追加する。
+reason_columns['check']=reason_columns.sum(axis= 1)
+reason_columns
+43/91:
+#0がないか？
+reason_columns['check'].unique()
+43/92:
+# checkはいらないので消きょ
+reason_columns = reason_columns.drop(['check'],axis = 1)
+43/93: reason_columns
+43/94:
+#多重共線性(ある一つの変数が他の変数によって説明がついてしまう状態)を回避するためにnこに対しn-1このダミー変数にする。
+reason_columns = pd.get_dummies(df['Reason for Absence'],drop_first = True)
+reason_columns
+43/95:
+#欠勤の理由がほぼ似ているものはグループ化する。(今回は1~14,15~17,18~21,22~28)
+df.columns.values
+43/96:
+df = df.drop(['Reason for Absence'],axis = 1)
+df
+43/97:
+#locは1~14までを見る。該当グループのものは1が入る。
+reason_columns.loc[:,1:14].max(axis = 1)
+43/98:
+reason_type1= reason_columns.loc[:,1:14].max(axis= 1)
+reason_type2= reason_columns.loc[:,15:17].max(axis= 1)
+reason_type3= reason_columns.loc[:,18:21].max(axis= 1)
+reason_type4= reason_columns.loc[:,22:].max(axis= 1)
+43/99: reason_type2
+43/100:
+#各列をもとのデータに結合
+df = pd.concat([df,reason_type1,reason_type2,reason_type3,reason_type4],axis = 1)
+df
+43/101:
+# これから名前を書き換えるためのコピペ用
+df.columns.values
+43/102:
+column_names = ['Date', 'Transportation Expense', 'Distance to Work', 'Age',
+       'Daily Work Load Average', 'Body Mass Index', 'Education',
+       'Children', 'Pets', 'Absenteeism Time in Hours', 'Reason_1', 'Reason_2', 'Reason_3','Reason_4']
+43/103: df.columns = column_names
+43/104: df
+43/105:
+#データ並び替えを行います。
+columns_names_reordered = ['Reason_1', 'Reason_2', 'Reason_3','Reason_4','Date', 'Transportation Expense', 'Distance to Work', 'Age',
+       'Daily Work Load Average', 'Body Mass Index', 'Education',
+       'Children', 'Pets', 'Absenteeism Time in Hours']
+43/106: df = df[columns_names_reordered]
+43/107:
+#データの保存(チェックポイント的な意味合い)
+df_reason_mod = df.copy()
+43/108:
+#日付のデータ型は？(最終的には月だけ欲しい)
+type(df_reason_mod['Date'][0])
+43/109:
+# str=>datetime
+df_reason_mod['Date'] = pd.to_datetime(df_reason_mod['Date'])
+df_reason_mod['Date']
+43/110:
+df_reason_mod['Date'] = pd.to_datetime(df_reason_mod['Date'], format = '%d/%m/%Y')
+type(df_reason_mod['Date'][0])
+43/111: df_reason_mod.info()
+43/112:
+#月のデータを抽出する
+list_months = []
+for i in range(df_reason_mod.shape[0]):
+    list_months.append(df_reason_mod['Date'][i].month)
+43/113: df_reason_mod['Month Value']=list_months
+43/114:
+#曜日のデータを抽出する
+def date_to_weekday(date_value):
+    return date_value.weekday()
+43/115: df_reason_mod['Day of the Week'] = df_reason_mod['Date'].apply(date_to_weekday)
+43/116: df_reason_mod = df_reason_mod.drop(['Date'],axis = 1)
+43/117:
+#いるデータの確認
+df_reason_mod
+43/118: df_reason_mod.columns.values
+43/119:
+columns_names_upd=['Reason_1', 'Reason_2', 'Reason_3', 'Reason_4', 'Month Value',
+       'Day of the Week',
+       'Transportation Expense', 'Distance to Work', 'Age',
+       'Daily Work Load Average', 'Body Mass Index', 'Education',
+       'Children', 'Pets', 'Absenteeism Time in Hours']
+43/120:
+df_reason_mod = df_reason_mod[columns_names_upd]
+df_reason_mod
+43/121:
+#謎データを読み解く(1は高卒、2~４は学部、修士、博士らしい)
+df_reason_mod['Education'].unique()
+43/122: df_reason_mod['Education'].value_counts()
+43/123:
+#高卒以下、大卒以上で分ける（大卒以上はあまり違いなさそうという直感的判断より。
+df_reason_mod['Education']=df_reason_mod['Education'].map({1:0,2:1,3:1,4:1})
+df_reason_mod['Education'].unique()
+43/124: df_reason_mod['Education'].value_counts()
+43/125: df_preprocessed = df_reason_mod.copy()
+43/126:
+#最後にデータをcsvに保存
+df_preprocessed.to_csv('Absenteeism_preprocessed.csv',index = False)
+44/1:
+import pandas as pd
+import numpy as np
+44/2:
+data_preprocessed = pd.read_csv('Absenteeism_preprocessed.csv')
+data_preprocessed
+44/3:
+#ここで使うのはロジスティック回帰なので二つの分類をする必要がある。ここでは特に多く欠勤した人、そうでない人に分ける。(中央値で分ける)
+data_preprocessed['Absenteeism Time in Hours'].median()
+44/4: targets = np.where(data_preprocessed['Absenteeism Time in Hours'] > data_preprocessed['Absenteeism Time in Hours'].median())
+44/5:
+targets = np.where(data_preprocessed['Absenteeism Time in Hours'] > data_preprocessed['Absenteeism Time in Hours'].median())
+targets
+44/6:
+targets = np.where(data_preprocessed['Absenteeism Time in Hours'] > data_preprocessed['Absenteeism Time in Hours'].median(),1,0)
+targets
+44/7:
+#中央値以上に休んでいる者を1,ない者を0
+targets = np.where(data_preprocessed['Absenteeism Time in Hours'] > data_preprocessed['Absenteeism Time in Hours'].median())
+targets
+44/8:
+#中央値以上に休んでいる者を1,ない者を0
+targets = np.where(data_preprocessed['Absenteeism Time in Hours'] > data_preprocessed['Absenteeism Time in Hours'].median(),1)
+targets
+44/9:
+#中央値以上に休んでいる者を1,ない者を0
+targets = np.where(data_preprocessed['Absenteeism Time in Hours'] > data_preprocessed['Absenteeism Time in Hours'].median(),1,0)
+targets
+44/10:
+data_preprocessed['Excessive Absenteeism'] = targets
+data_preprocessed
+44/11: targets.sum()/targets.shape[0]
+44/12: data_with_targets = data_preprocessed.drop(['Absenteeism Time'],axis= 1)
+44/13: data_with_targets = data_preprocessed.drop(['Absenteeism Time in Hours'],axis= 1)
+44/14:
+data_with_targets = data_preprocessed.drop(['Absenteeism Time in Hours'],axis= 1)
+data_with_targets
+44/15:
+#入力でーた(ターゲットなし)を作成する
+unscaled_inputs = data_with_targets.iloc[:,:-1]
+44/16:
+from sklearn.preprocessing import StandardScaler
+absenteeism_scaler = StandardScaler()
+44/17: absenteeism_scaler.fit(unscaled_inputs)
+44/18:
+scaled_inputs = absenteeism_scaler.transform(unscaled_inputs)
+scaled_inputs
+44/19: unscaled_inputs
+44/20:
+#テストデータ、訓練用の分割
+from sklearn.model_selection import train_test_split
+train_test_split(scaled_inputs,targets)
+44/21: x_train,x_test,y_train,y_test = train_test_split(scaled_inputs,targets)
+44/22: print(x_train.shape,y_train.shape)
+44/23: x_train,x_test,y_train,y_test = train_test_split(scaled_inputs,targets,train_size = 0.8)
+44/24: print(x_train.shape,y_train.shape)
+44/25:
+#テストデータ、訓練用の分割
+from sklearn.model_selection import train_test_split
+train_test_split(scaled_inputs,targets)
+44/26:
+#テストデータ、訓練用の分割
+from sklearn.model_selection import train_test_split
+train_test_split(scaled_inputs,targets)
+44/27:
+#テストデータ、訓練用の分割
+from sklearn.model_selection import train_test_split
+train_test_split(scaled_inputs,targets)
+44/28:
+#モデルの実装
+from sklearn.linear_model import LogisticRegression
+reg=  LogisticRegression()
+reg.fit(x_train,y_train)
+reg.score(x_train,y_train)
+44/29: model_outputs = reg.predict(x_train)
+44/30:
+model_outputs = reg.predict(x_train)
+np.sum((model_outputs == y_train))/model_outputs.shape[0]
+44/31:
+#scaled_inputsはdf型ではなくndarray型。
+unscaled_inputs.columns.values
+44/32:
+#scaled_inputsはdf型ではなくndarray型。
+feature_name=unscaled_inputs.columns.values
+44/33:
+summary_table = pd.DataFrame(columns=['Feature name'],data=feature_name)
+summary_table['Coefficient']=np.transpose(reg.coef_)
+summary_table
+44/34: reg.coef_
+44/35:
+summary_table.index = summary_talbe.index + 1
+summary_talbe.loc[0] = ['Intercept',reg.intercept_[0]]
+summary_table = summary_table.sort_index()
+summary_table
+44/36:
+summary_table.index = summary_talbe.index + 1
+summary_table.loc[0] = ['Intercept',reg.intercept_[0]]
+summary_table = summary_table.sort_index()
+summary_table
+44/37:
+summary_table.index = summary_table.index + 1
+summary_table.loc[0] = ['Intercept',reg.intercept_[0]]
+summary_table = summary_table.sort_index()
+summary_table
+44/38:
+summary_table.index = summary_table.index + 1
+summary_table.loc[0] = ['Intercept',reg.intercept_[0]]
+summary_table = summary_table.sort_index()
+summary_table['Odds_ratio'] = np.exp(summary_table.Coefficient)
+summary_table
+44/39: summary_table.sort_values('Odds_ratio',ascending=False)
+44/40:
+#odds比の順番に並び替えた方がわかりやすい。
+summary_table.sort_values('Odds_ratio',ascending=False)
+45/1:
+#標準化は指定した部分のみで行う。
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.preprocessing import StandardScaler
+
+class CustomScaler(BaseEstimator,TransformerMixin):
+    def __init__(self,columns,copy = True,with_mean=True,with_std= True):
+    self.scaler = StandardScaler(copy, with_mean, with_std)
+    self.mean_ = None
+    self.var_ = None
+    
+    def fit(self, X, y=None):
+        self.scaler.fit(X[self.columns],y)
+        self.mean_ = np.mean(X[self.columns])
+        self.var_ = np.var(X[self.columns])
+        return self
+    
+    def transform(self, X, y=None, copy=None):
+        init_col_order= X.columns
+        X_scaled = pd.DataFrame(self.scaler.transform(X[self.columns]),columns=self.columns)
+        X_not_scaled = X.loc[:,X.columns.isin(self.columns)]
+        return pd.concat([X_not_scaled, X_scaled],axis = 1)[init_col_order]
+45/2:
+#標準化は指定した部分のみで行う。
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.preprocessing import StandardScaler
+
+class CustomScaler(BaseEstimator,TransformerMixin):
+    def __init__(self,columns,copy = True,with_mean=True,with_std= True):
+        self.scaler = StandardScaler(copy, with_mean, with_std)
+        self.mean_ = None
+        self.var_ = None
+    
+    def fit(self, X, y=None):
+        self.scaler.fit(X[self.columns],y)
+        self.mean_ = np.mean(X[self.columns])
+        self.var_ = np.var(X[self.columns])
+        return self
+    
+    def transform(self, X, y=None, copy=None):
+        init_col_order= X.columns
+        X_scaled = pd.DataFrame(self.scaler.transform(X[self.columns]),columns=self.columns)
+        X_not_scaled = X.loc[:,X.columns.isin(self.columns)]
+        return pd.concat([X_not_scaled, X_scaled],axis = 1)[init_col_order]
+45/3: unscaled_inputs.columns.values
+45/4:
+import pandas as pd
+import numpy as np
+45/5:
+data_preprocessed = pd.read_csv('Absenteeism_preprocessed.csv')
+data_preprocessed
+45/6:
+#ここで使うのはロジスティック回帰なので二つの分類をする必要がある。ここでは特に多く欠勤した人、そうでない人に分ける。(中央値で分ける)
+data_preprocessed['Absenteeism Time in Hours'].median()
+45/7:
+#中央値以上に休んでいる者を1,ない者を0。whereはexcelで言うとif文。
+targets = np.where(data_preprocessed['Absenteeism Time in Hours'] > data_preprocessed['Absenteeism Time in Hours'].median(),1,0)
+targets
+45/8:
+data_preprocessed['Excessive Absenteeism'] = targets
+data_preprocessed
+45/9:
+#データの数の調整はする必要があるか→今回は半々なのでなさそう
+targets.sum()/targets.shape[0]
+45/10:
+data_with_targets = data_preprocessed.drop(['Absenteeism Time in Hours'],axis= 1)
+data_with_targets
+45/11:
+#入力でーた(ターゲットなし)を作成する
+unscaled_inputs = data_with_targets.iloc[:,:-1]
+45/12:
+from sklearn.preprocessing import StandardScaler
+absenteeism_scaler = StandardScaler()
+45/13: absenteeism_scaler.fit(unscaled_inputs)
+45/14:
+#fitするだけでは演算が行われただけ。実際にデータを置き換えるにはtransformを用いる。
+scaled_inputs = absenteeism_scaler.transform(unscaled_inputs)
+scaled_inputs
+45/15:
+#テストデータ、訓練用の分割
+from sklearn.model_selection import train_test_split
+train_test_split(scaled_inputs,targets)
+45/16: x_train,x_test,y_train,y_test = train_test_split(scaled_inputs,targets,train_size = 0.8,random_state = 20)
+45/17: print(x_train.shape,y_train.shape)
+45/18:
+#モデルの実装、最後に予測の正確性
+from sklearn.linear_model import LogisticRegression
+reg=  LogisticRegression()
+reg.fit(x_train,y_train)
+reg.score(x_train,y_train)
+45/19:
+#手作業で計算しても結果は同じ
+model_outputs = reg.predict(x_train)
+np.sum((model_outputs == y_train))/model_outputs.shape[0]
+45/20:
+#scaled_inputsはdf型ではなくndarray型。なので一旦valuesを変数に格納
+feature_name=unscaled_inputs.columns.values
+45/21:
+summary_table = pd.DataFrame(columns=['Feature name'],data=feature_name)
+summary_table['Coefficient']=np.transpose(reg.coef_)
+summary_table
+45/22:
+#coefficientは値のインパクトの大きさ。odds比はある二つのことのない人とある人でどれくらい違うかを示す。
+summary_table.index = summary_table.index + 1
+summary_table.loc[0] = ['Intercept',reg.intercept_[0]]
+summary_table = summary_table.sort_index()
+summary_table['Odds_ratio'] = np.exp(summary_table.Coefficient)
+summary_table
+45/23:
+#odds比の順番に並び替えた方がわかりやすい。
+summary_table.sort_values('Odds_ratio',ascending=False)
+45/24:
+#標準化は指定した部分のみで行う。
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.preprocessing import StandardScaler
+
+class CustomScaler(BaseEstimator,TransformerMixin):
+    def __init__(self,columns,copy = True,with_mean=True,with_std= True):
+        self.scaler = StandardScaler(copy, with_mean, with_std)
+        self.mean_ = None
+        self.var_ = None
+    
+    def fit(self, X, y=None):
+        self.scaler.fit(X[self.columns],y)
+        self.mean_ = np.mean(X[self.columns])
+        self.var_ = np.var(X[self.columns])
+        return self
+    
+    def transform(self, X, y=None, copy=None):
+        init_col_order= X.columns
+        X_scaled = pd.DataFrame(self.scaler.transform(X[self.columns]),columns=self.columns)
+        X_not_scaled = X.loc[:,X.columns.isin(self.columns)]
+        return pd.concat([X_not_scaled, X_scaled],axis = 1)[init_col_order]
+45/25: unscaled_inputs.columns.values
+45/26:
+columns_to_scale=['Month Value',
+       'Day of the Week', 'Transportation Expense', 'Distance to Work',
+       'Age', 'Daily Work Load Average', 'Body Mass Index', 'Education',
+       'Children', 'Pets']
+45/27: absenteeism_scaler=CustomScaler(columns_to_scale)
+45/28: absenteeism_scaler.fit(unscaled_inputs)
+45/29:
+#標準化は指定した部分のみで行う。
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.preprocessing import StandardScaler
+
+class CustomScaler(BaseEstimator,TransformerMixin):
+    def __init__(self,columns,copy = True,with_mean=True,with_std= True):
+        self.scaler = StandardScaler(copy, with_mean, with_std)
+        self.columns = true
+        self.mean_ = None
+        self.var_ = None
+    
+    def fit(self, X, y=None):
+        self.scaler.fit(X[self.columns],y)
+        self.mean_ = np.mean(X[self.columns])
+        self.var_ = np.var(X[self.columns])
+        return self
+    
+    def transform(self, X, y=None, copy=None):
+        init_col_order= X.columns
+        X_scaled = pd.DataFrame(self.scaler.transform(X[self.columns]),columns=self.columns)
+        X_not_scaled = X.loc[:,X.columns.isin(self.columns)]
+        return pd.concat([X_not_scaled, X_scaled],axis = 1)[init_col_order]
+45/30: unscaled_inputs.columns.values
+45/31:
+columns_to_scale=['Month Value',
+       'Day of the Week', 'Transportation Expense', 'Distance to Work',
+       'Age', 'Daily Work Load Average', 'Body Mass Index', 'Education',
+       'Children', 'Pets']
+45/32: absenteeism_scaler=CustomScaler(columns_to_scale)
+45/33:
+#標準化は指定した部分のみで行う。
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.preprocessing import StandardScaler
+
+class CustomScaler(BaseEstimator,TransformerMixin):
+    def __init__(self,columns,copy = True,with_mean=True,with_std= True):
+        self.scaler = StandardScaler(copy, with_mean, with_std)
+        self.columns = True
+        self.mean_ = None
+        self.var_ = None
+    
+    def fit(self, X, y=None):
+        self.scaler.fit(X[self.columns],y)
+        self.mean_ = np.mean(X[self.columns])
+        self.var_ = np.var(X[self.columns])
+        return self
+    
+    def transform(self, X, y=None, copy=None):
+        init_col_order= X.columns
+        X_scaled = pd.DataFrame(self.scaler.transform(X[self.columns]),columns=self.columns)
+        X_not_scaled = X.loc[:,X.columns.isin(self.columns)]
+        return pd.concat([X_not_scaled, X_scaled],axis = 1)[init_col_order]
+45/34: unscaled_inputs.columns.values
+45/35:
+columns_to_scale=['Month Value',
+       'Day of the Week', 'Transportation Expense', 'Distance to Work',
+       'Age', 'Daily Work Load Average', 'Body Mass Index', 'Education',
+       'Children', 'Pets']
+45/36: absenteeism_scaler=CustomScaler(columns_to_scale)
+45/37: absenteeism_scaler.fit(unscaled_inputs)
+45/38:
+#標準化は指定した部分のみで行う。
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.preprocessing import StandardScaler
+
+class CustomScaler(BaseEstimator,TransformerMixin):
+    def __init__(self,columns,copy = True,with_mean=True,with_std= True):
+        self.scaler = StandardScaler(copy, with_mean, with_std)
+        self.columns = columns
+        self.mean_ = None
+        self.var_ = None
+    
+    def fit(self, X, y=None):
+        self.scaler.fit(X[self.columns],y)
+        self.mean_ = np.mean(X[self.columns])
+        self.var_ = np.var(X[self.columns])
+        return self
+    
+    def transform(self, X, y=None, copy=None):
+        init_col_order= X.columns
+        X_scaled = pd.DataFrame(self.scaler.transform(X[self.columns]),columns=self.columns)
+        X_not_scaled = X.loc[:,X.columns.isin(self.columns)]
+        return pd.concat([X_not_scaled, X_scaled],axis = 1)[init_col_order]
+45/39: unscaled_inputs.columns.values
+45/40:
+columns_to_scale=['Month Value',
+       'Day of the Week', 'Transportation Expense', 'Distance to Work',
+       'Age', 'Daily Work Load Average', 'Body Mass Index', 'Education',
+       'Children', 'Pets']
+45/41: absenteeism_scaler=CustomScaler(columns_to_scale)
+45/42: absenteeism_scaler.fit(unscaled_inputs)
+45/43:
+#標準化は指定した部分のみで行う。
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.preprocessing import StandardScaler
+
+class CustomScaler(BaseEstimator,TransformerMixin):
+    def __init__(self,columns,copy = True,with_mean=True,with_std= True):
+        self.scaler = StandardScaler(copy, with_mean, with_std)
+        self.columns = columns
+        self.mean_ = None
+        self.var_ = None
+    
+    def fit(self, X, y=None):
+        self.scaler.fit(X[self.columns],y)
+        self.mean_ = np.mean(X[self.columns])
+        self.var_ = np.var(X[self.columns])
+        return self
+    
+    def transform(self, X, y=None, copy=None):
+        init_col_order= X.columns
+        X_scaled = pd.DataFrame(self.scaler.transform(X[self.columns]),columns=self.columns)
+        X_not_scaled = X.loc[:,~X.columns.isin(self.columns)]
+        return pd.concat([X_not_scaled, X_scaled],axis = 1)[init_col_order]
+45/44: unscaled_inputs.columns.values
+45/45:
+columns_to_scale=['Month Value',
+       'Day of the Week', 'Transportation Expense', 'Distance to Work',
+       'Age', 'Daily Work Load Average', 'Body Mass Index', 'Education',
+       'Children', 'Pets']
+45/46: absenteeism_scaler=CustomScaler(columns_to_scale)
+45/47: absenteeism_scaler.fit(unscaled_inputs)
+45/48:
+#標準化は指定した部分のみで行う。
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.preprocessing import StandardScaler
+
+class CustomScaler(BaseEstimator,TransformerMixin):
+    def __init__(self,columns,with_mean=True,with_std= True):
+        self.scaler = StandardScaler(with_mean, with_std)
+        self.columns = columns
+        self.mean_ = None
+        self.var_ = None
+    
+    def fit(self, X, y=None):
+        self.scaler.fit(X[self.columns],y)
+        self.mean_ = np.mean(X[self.columns])
+        self.var_ = np.var(X[self.columns])
+        return self
+    
+    def transform(self, X, y=None, copy=None):
+        init_col_order= X.columns
+        X_scaled = pd.DataFrame(self.scaler.transform(X[self.columns]),columns=self.columns)
+        X_not_scaled = X.loc[:,~X.columns.isin(self.columns)]
+        return pd.concat([X_not_scaled, X_scaled],axis = 1)[init_col_order]
+45/49: unscaled_inputs.columns.values
+45/50:
+columns_to_scale=['Month Value',
+       'Day of the Week', 'Transportation Expense', 'Distance to Work',
+       'Age', 'Daily Work Load Average', 'Body Mass Index', 'Education',
+       'Children', 'Pets']
+45/51: absenteeism_scaler=CustomScaler(columns_to_scale)
+45/52: absenteeism_scaler.fit(unscaled_inputs)
+45/53:
+#標準化は指定した部分のみで行う。
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.preprocessing import StandardScaler
+
+class CustomScaler(BaseEstimator,TransformerMixin):
+    def __init__(self,columns):
+        self.scaler = StandardScaler()
+        self.columns = columns
+        self.mean_ = None
+        self.var_ = None
+    
+    def fit(self, X, y=None):
+        self.scaler.fit(X[self.columns],y)
+        self.mean_ = np.mean(X[self.columns])
+        self.var_ = np.var(X[self.columns])
+        return self
+    
+    def transform(self, X, y=None, copy=None):
+        init_col_order= X.columns
+        X_scaled = pd.DataFrame(self.scaler.transform(X[self.columns]),columns=self.columns)
+        X_not_scaled = X.loc[:,~X.columns.isin(self.columns)]
+        return pd.concat([X_not_scaled, X_scaled],axis = 1)[init_col_order]
+45/54: unscaled_inputs.columns.values
+45/55:
+columns_to_scale=['Month Value',
+       'Day of the Week', 'Transportation Expense', 'Distance to Work',
+       'Age', 'Daily Work Load Average', 'Body Mass Index', 'Education',
+       'Children', 'Pets']
+45/56: absenteeism_scaler=CustomScaler(columns_to_scale)
+45/57: absenteeism_scaler.fit(unscaled_inputs)
+45/58:
+scaled_inputs = absenteeism_scaler.transform(unscaled_inputs)
+scaled_inputs
+47/1:
+import pandas as pd
+import numpy as np
+47/2:
+data_preprocessed = pd.read_csv('Absenteeism_preprocessed.csv')
+data_preprocessed
+47/3:
+#ここで使うのはロジスティック回帰なので二つの分類をする必要がある。ここでは特に多く欠勤した人、そうでない人に分ける。(中央値で分ける)
+data_preprocessed['Absenteeism Time in Hours'].median()
+47/4:
+#中央値以上に休んでいる者を1,ない者を0。whereはexcelで言うとif文。
+targets = np.where(data_preprocessed['Absenteeism Time in Hours'] > data_preprocessed['Absenteeism Time in Hours'].median(),1,0)
+targets
+47/5:
+data_preprocessed['Excessive Absenteeism'] = targets
+data_preprocessed
+47/6:
+#データの数の調整はする必要があるか→今回は半々なのでなさそう
+targets.sum()/targets.shape[0]
+47/7:
+data_with_targets = data_preprocessed.drop(['Absenteeism Time in Hours'],axis= 1)
+data_with_targets
+47/8:
+#入力でーた(ターゲットなし)を作成する
+unscaled_inputs = data_with_targets.iloc[:,:-1]
+47/9:
+from sklearn.preprocessing import StandardScaler
+absenteeism_scaler = StandardScaler()
+47/10: absenteeism_scaler.fit(unscaled_inputs)
+47/11:
+#fitするだけでは演算が行われただけ。実際にデータを置き換えるにはtransformを用いる。
+scaled_inputs = absenteeism_scaler.transform(unscaled_inputs)
+scaled_inputs
+47/12:
+#テストデータ、訓練用の分割
+from sklearn.model_selection import train_test_split
+train_test_split(scaled_inputs,targets)
+47/13: x_train,x_test,y_train,y_test = train_test_split(scaled_inputs,targets,train_size = 0.8,random_state = 20)
+47/14: print(x_train.shape,y_train.shape)
+47/15:
+#モデルの実装、最後に予測の正確性
+from sklearn.linear_model import LogisticRegression
+reg=  LogisticRegression()
+reg.fit(x_train,y_train)
+reg.score(x_train,y_train)
+47/16:
+#手作業で計算しても結果は同じ
+model_outputs = reg.predict(x_train)
+np.sum((model_outputs == y_train))/model_outputs.shape[0]
+47/17:
+#scaled_inputsはdf型ではなくndarray型。なので一旦valuesを変数に格納
+feature_name=unscaled_inputs.columns.values
+47/18:
+summary_table = pd.DataFrame(columns=['Feature name'],data=feature_name)
+summary_table['Coefficient']=np.transpose(reg.coef_)
+summary_table
+47/19:
+#coefficientは値のインパクトの大きさ。odds比はある二つのことのない人とある人でどれくらい違うかを示す。
+summary_table.index = summary_table.index + 1
+summary_table.loc[0] = ['Intercept',reg.intercept_[0]]
+summary_table = summary_table.sort_index()
+summary_table['Odds_ratio'] = np.exp(summary_table.Coefficient)
+summary_table
+47/20:
+#odds比の順番に並び替えた方がわかりやすい。
+summary_table.sort_values('Odds_ratio',ascending=False)
+47/21:
+#標準化は指定した部分のみで行う。
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.preprocessing import StandardScaler
+
+class CustomScaler(BaseEstimator,TransformerMixin):
+    def __init__(self,columns):
+        self.scaler = StandardScaler()
+        self.columns = columns
+        self.mean_ = None
+        self.var_ = None
+    
+    def fit(self, X, y=None):
+        self.scaler.fit(X[self.columns],y)
+        self.mean_ = np.mean(X[self.columns])
+        self.var_ = np.var(X[self.columns])
+        return self
+    
+    def transform(self, X, y=None, copy=None):
+        init_col_order= X.columns
+        X_scaled = pd.DataFrame(self.scaler.transform(X[self.columns]),columns=self.columns)
+        X_not_scaled = X.loc[:,~X.columns.isin(self.columns)]
+        return pd.concat([X_not_scaled, X_scaled],axis = 1)[init_col_order]
+47/22: unscaled_inputs.columns.values
+47/23:
+columns_to_scale=['Month Value',
+       'Day of the Week', 'Transportation Expense', 'Distance to Work',
+       'Age', 'Daily Work Load Average', 'Body Mass Index', 'Education',
+       'Children', 'Pets']
+47/24: absenteeism_scaler=CustomScaler(columns_to_scale)
+47/25: absenteeism_scaler.fit(unscaled_inputs)
+47/26:
+scaled_inputs = absenteeism_scaler.transform(unscaled_inputs)
+scaled_inputs
+49/1:
+import pandas as pd
+import numpy as np
+49/2:
+data_preprocessed = pd.read_csv('Absenteeism_preprocessed.csv')
+data_preprocessed
+49/3:
+#ここで使うのはロジスティック回帰なので二つの分類をする必要がある。ここでは特に多く欠勤した人、そうでない人に分ける。(中央値で分ける)
+data_preprocessed['Absenteeism Time in Hours'].median()
+49/4:
+#中央値以上に休んでいる者を1,ない者を0。whereはexcelで言うとif文。
+targets = np.where(data_preprocessed['Absenteeism Time in Hours'] > data_preprocessed['Absenteeism Time in Hours'].median(),1,0)
+targets
+49/5:
+data_preprocessed['Excessive Absenteeism'] = targets
+data_preprocessed
+49/6:
+#データの数の調整はする必要があるか→今回は半々なのでなさそう
+targets.sum()/targets.shape[0]
+49/7:
+data_with_targets = data_preprocessed.drop(['Absenteeism Time in Hours'],axis= 1)
+data_with_targets
+49/8:
+#入力でーた(ターゲットなし)を作成する
+unscaled_inputs = data_with_targets.iloc[:,:-1]
+49/9:
+from sklearn.preprocessing import StandardScaler
+absenteeism_scaler = StandardScaler()
+49/10: absenteeism_scaler.fit(unscaled_inputs)
+49/11:
+#fitするだけでは演算が行われただけ。実際にデータを置き換えるにはtransformを用いる。
+scaled_inputs = absenteeism_scaler.transform(unscaled_inputs)
+scaled_inputs
+49/12:
+#テストデータ、訓練用の分割
+from sklearn.model_selection import train_test_split
+train_test_split(scaled_inputs,targets)
+49/13: x_train,x_test,y_train,y_test = train_test_split(scaled_inputs,targets,train_size = 0.8,random_state = 20)
+49/14: print(x_train.shape,y_train.shape)
+49/15:
+#モデルの実装、最後に予測の正確性
+from sklearn.linear_model import LogisticRegression
+reg=  LogisticRegression()
+reg.fit(x_train,y_train)
+reg.score(x_train,y_train)
+49/16:
+#手作業で計算しても結果は同じ
+model_outputs = reg.predict(x_train)
+np.sum((model_outputs == y_train))/model_outputs.shape[0]
+49/17:
+#scaled_inputsはdf型ではなくndarray型。なので一旦valuesを変数に格納
+feature_name=unscaled_inputs.columns.values
+49/18:
+summary_table = pd.DataFrame(columns=['Feature name'],data=feature_name)
+summary_table['Coefficient']=np.transpose(reg.coef_)
+summary_table
+49/19:
+#coefficientは値のインパクトの大きさ。odds比はある二つのことのない人とある人でどれくらい違うかを示す。
+summary_table.index = summary_table.index + 1
+summary_table.loc[0] = ['Intercept',reg.intercept_[0]]
+summary_table = summary_table.sort_index()
+summary_table['Odds_ratio'] = np.exp(summary_table.Coefficient)
+summary_table
+49/20:
+#odds比の順番に並び替えた方がわかりやすい。1から遠ければその理由は欠勤の大きな理由となっているし1ならその理由とはなり得ない。
+summary_table.sort_values('Odds_ratio',ascending=False)
+49/21:
+#標準化は指定した部分のみで行う。
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.preprocessing import StandardScaler
+
+class CustomScaler(BaseEstimator,TransformerMixin):
+    def __init__(self,columns):
+        self.scaler = StandardScaler()
+        self.columns = columns
+        self.mean_ = None
+        self.var_ = None
+    
+    def fit(self, X, y=None):
+        self.scaler.fit(X[self.columns],y)
+        self.mean_ = np.mean(X[self.columns])
+        self.var_ = np.var(X[self.columns])
+        return self
+    
+    def transform(self, X, y=None, copy=None):
+        init_col_order= X.columns
+        X_scaled = pd.DataFrame(self.scaler.transform(X[self.columns]),columns=self.columns)
+        X_not_scaled = X.loc[:,~X.columns.isin(self.columns)]
+        return pd.concat([X_not_scaled, X_scaled],axis = 1)[init_col_order]
+49/22: unscaled_inputs.columns.values
+49/23:
+columns_to_scale=['Month Value',
+       'Day of the Week', 'Transportation Expense', 'Distance to Work',
+       'Age', 'Daily Work Load Average', 'Body Mass Index', 'Education',
+       'Children', 'Pets']
+49/24: absenteeism_scaler=CustomScaler(columns_to_scale)
+49/25: absenteeism_scaler.fit(unscaled_inputs)
+49/26:
+scaled_inputs = absenteeism_scaler.transform(unscaled_inputs)
+scaled_inputs
+51/1: reg.score(x_test, y_test)
+52/1:
+import pandas as pd
+import numpy as np
+52/2:
+data_preprocessed = pd.read_csv('Absenteeism_preprocessed.csv')
+data_preprocessed
+52/3:
+#ここで使うのはロジスティック回帰なので二つの分類をする必要がある。ここでは特に多く欠勤した人、そうでない人に分ける。(中央値で分ける)
+data_preprocessed['Absenteeism Time in Hours'].median()
+52/4:
+#中央値以上に休んでいる者を1,ない者を0。whereはexcelで言うとif文。
+targets = np.where(data_preprocessed['Absenteeism Time in Hours'] > data_preprocessed['Absenteeism Time in Hours'].median(),1,0)
+targets
+52/5:
+data_preprocessed['Excessive Absenteeism'] = targets
+data_preprocessed
+52/6:
+#データの数の調整はする必要があるか→今回は半々なのでなさそう
+targets.sum()/targets.shape[0]
+52/7:
+#ほとんど影響のないデータを消す場合ここに追記する。['Absenteeism Time in Hours'],→['Absenteeism Time in Hours','Reason_1'],
+data_with_targets = data_preprocessed.drop(['Absenteeism Time in Hours'],axis= 1)
+data_with_targets
+52/8:
+#入力でーた(ターゲットなし)を作成する
+unscaled_inputs = data_with_targets.iloc[:,:-1]
+52/9:
+from sklearn.preprocessing import StandardScaler
+absenteeism_scaler = StandardScaler()
+52/10: absenteeism_scaler.fit(unscaled_inputs)
+52/11:
+#fitするだけでは演算が行われただけ。実際にデータを置き換えるにはtransformを用いる。
+scaled_inputs = absenteeism_scaler.transform(unscaled_inputs)
+scaled_inputs
+52/12:
+#テストデータ、訓練用の分割
+from sklearn.model_selection import train_test_split
+train_test_split(scaled_inputs,targets)
+52/13: x_train,x_test,y_train,y_test = train_test_split(scaled_inputs,targets,train_size = 0.8,random_state = 20)
+52/14: print(x_train.shape,y_train.shape)
+52/15:
+#モデルの実装、最後に予測の正確性
+from sklearn.linear_model import LogisticRegression
+reg=  LogisticRegression()
+reg.fit(x_train,y_train)
+reg.score(x_train,y_train)
+52/16:
+#手作業で計算しても結果は同じ
+model_outputs = reg.predict(x_train)
+np.sum((model_outputs == y_train))/model_outputs.shape[0]
+52/17:
+#scaled_inputsはdf型ではなくndarray型。なので一旦valuesを変数に格納
+feature_name=unscaled_inputs.columns.values
+52/18:
+summary_table = pd.DataFrame(columns=['Feature name'],data=feature_name)
+summary_table['Coefficient']=np.transpose(reg.coef_)
+summary_table
+52/19:
+#coefficientは値のインパクトの大きさ。odds比はある二つのことのない人とある人でどれくらい違うかを示す。
+summary_table.index = summary_table.index + 1
+summary_table.loc[0] = ['Intercept',reg.intercept_[0]]
+summary_table = summary_table.sort_index()
+summary_table['Odds_ratio'] = np.exp(summary_table.Coefficient)
+summary_table
+52/20:
+#odds比の順番に並び替えた方がわかりやすい。1から遠ければその理由は欠勤の大きな理由となっているし1ならその理由とはなり得ない。
+summary_table.sort_values('Odds_ratio',ascending=False)
+52/21:
+#標準化は指定した部分のみで行う。
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.preprocessing import StandardScaler
+
+class CustomScaler(BaseEstimator,TransformerMixin):
+    def __init__(self,columns):
+        self.scaler = StandardScaler()
+        self.columns = columns
+        self.mean_ = None
+        self.var_ = None
+    
+    def fit(self, X, y=None):
+        self.scaler.fit(X[self.columns],y)
+        self.mean_ = np.mean(X[self.columns])
+        self.var_ = np.var(X[self.columns])
+        return self
+    
+    def transform(self, X, y=None, copy=None):
+        init_col_order= X.columns
+        X_scaled = pd.DataFrame(self.scaler.transform(X[self.columns]),columns=self.columns)
+        X_not_scaled = X.loc[:,~X.columns.isin(self.columns)]
+        return pd.concat([X_not_scaled, X_scaled],axis = 1)[init_col_order]
+52/22: unscaled_inputs.columns.values
+52/23:
+columns_to_scale=['Month Value',
+       'Day of the Week', 'Transportation Expense', 'Distance to Work',
+       'Age', 'Daily Work Load Average', 'Body Mass Index', 'Education',
+       'Children', 'Pets']
+52/24: absenteeism_scaler=CustomScaler(columns_to_scale)
+52/25: absenteeism_scaler.fit(unscaled_inputs)
+52/26:
+scaled_inputs = absenteeism_scaler.transform(unscaled_inputs)
+scaled_inputs
+52/27: reg.score(x_test, y_test)
+52/28: reg.predicted_proba(x_test)
+52/29: reg.predict_proba(x_test)
+53/1:
+#データを機械語で保存するライブラリ
+import pickle
+with open('model','wb') as file:
+    pickle.dump(reg, file)
+54/1:
+import pandas as pd
+import numpy as np
+54/2:
+data_preprocessed = pd.read_csv('Absenteeism_preprocessed.csv')
+data_preprocessed
+54/3:
+#ここで使うのはロジスティック回帰なので二つの分類をする必要がある。ここでは特に多く欠勤した人、そうでない人に分ける。(中央値で分ける)
+data_preprocessed['Absenteeism Time in Hours'].median()
+54/4:
+#中央値以上に休んでいる者を1,ない者を0。whereはexcelで言うとif文。
+targets = np.where(data_preprocessed['Absenteeism Time in Hours'] > data_preprocessed['Absenteeism Time in Hours'].median(),1,0)
+targets
+54/5:
+data_preprocessed['Excessive Absenteeism'] = targets
+data_preprocessed
+54/6:
+#データの数の調整はする必要があるか→今回は半々なのでなさそう
+targets.sum()/targets.shape[0]
+54/7:
+#ほとんど影響のないデータを消す場合ここに追記する。['Absenteeism Time in Hours'],→['Absenteeism Time in Hours','Reason_1'],
+data_with_targets = data_preprocessed.drop(['Absenteeism Time in Hours'],axis= 1)
+data_with_targets
+54/8:
+#入力でーた(ターゲットなし)を作成する
+unscaled_inputs = data_with_targets.iloc[:,:-1]
+54/9:
+from sklearn.preprocessing import StandardScaler
+absenteeism_scaler = StandardScaler()
+54/10: absenteeism_scaler.fit(unscaled_inputs)
+54/11:
+#fitするだけでは演算が行われただけ。実際にデータを置き換えるにはtransformを用いる。
+scaled_inputs = absenteeism_scaler.transform(unscaled_inputs)
+scaled_inputs
+54/12:
+#テストデータ、訓練用の分割
+from sklearn.model_selection import train_test_split
+train_test_split(scaled_inputs,targets)
+54/13: x_train,x_test,y_train,y_test = train_test_split(scaled_inputs,targets,train_size = 0.8,random_state = 20)
+54/14: print(x_train.shape,y_train.shape)
+54/15:
+#モデルの実装、最後に予測の正確性
+from sklearn.linear_model import LogisticRegression
+reg=  LogisticRegression()
+reg.fit(x_train,y_train)
+reg.score(x_train,y_train)
+54/16:
+#手作業で計算しても結果は同じ
+model_outputs = reg.predict(x_train)
+np.sum((model_outputs == y_train))/model_outputs.shape[0]
+54/17:
+#scaled_inputsはdf型ではなくndarray型。なので一旦valuesを変数に格納
+feature_name=unscaled_inputs.columns.values
+54/18:
+summary_table = pd.DataFrame(columns=['Feature name'],data=feature_name)
+summary_table['Coefficient']=np.transpose(reg.coef_)
+summary_table
+54/19:
+#coefficientは値のインパクトの大きさ。odds比はある二つのことのない人とある人でどれくらい違うかを示す。
+summary_table.index = summary_table.index + 1
+summary_table.loc[0] = ['Intercept',reg.intercept_[0]]
+summary_table = summary_table.sort_index()
+summary_table['Odds_ratio'] = np.exp(summary_table.Coefficient)
+summary_table
+54/20:
+#odds比の順番に並び替えた方がわかりやすい。1から遠ければその理由は欠勤の大きな理由となっているし1ならその理由とはなり得ない。
+summary_table.sort_values('Odds_ratio',ascending=False)
+54/21:
+#標準化は指定した部分のみで行う。
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.preprocessing import StandardScaler
+
+class CustomScaler(BaseEstimator,TransformerMixin):
+    def __init__(self,columns):
+        self.scaler = StandardScaler()
+        self.columns = columns
+        self.mean_ = None
+        self.var_ = None
+    
+    def fit(self, X, y=None):
+        self.scaler.fit(X[self.columns],y)
+        self.mean_ = np.mean(X[self.columns])
+        self.var_ = np.var(X[self.columns])
+        return self
+    
+    def transform(self, X, y=None, copy=None):
+        init_col_order= X.columns
+        X_scaled = pd.DataFrame(self.scaler.transform(X[self.columns]),columns=self.columns)
+        X_not_scaled = X.loc[:,~X.columns.isin(self.columns)]
+        return pd.concat([X_not_scaled, X_scaled],axis = 1)[init_col_order]
+54/22: unscaled_inputs.columns.values
+54/23:
+columns_to_scale=['Month Value',
+       'Day of the Week', 'Transportation Expense', 'Distance to Work',
+       'Age', 'Daily Work Load Average', 'Body Mass Index', 'Education',
+       'Children', 'Pets']
+54/24: absenteeism_scaler=CustomScaler(columns_to_scale)
+54/25: absenteeism_scaler.fit(unscaled_inputs)
+54/26:
+scaled_inputs = absenteeism_scaler.transform(unscaled_inputs)
+scaled_inputs
+54/27: reg.score(x_test, y_test)
+54/28:
+#左が欠勤しない確率、右が欠勤する確率
+reg.predict_proba(x_test)
+54/29:
+#データを機械語で保存するライブラリ
+import pickle
+with open('model','wb') as file:
+    pickle.dump(reg, file)
+54/30:
+with open('scaler','wb')as file:
+    pickle.dump(absenteeism_scaler, file)
+55/1:
+#全てをimportする。通常(全体が見えない場合)はimportしすぎるとconflictしてしまうので好ましくない。
+from absenteeism_module import *
+55/2: model = absenteeism_model('model','scaler')
+55/3: model.load_and_clean_data('Absenteeism_new_data.csv')
+55/4: model.load_and_clean_data('Absenteeism_new_data.csv')
+55/5:
+#全てをimportする。通常(全体が見えない場合)はimportしすぎるとconflictしてしまうので好ましくない。
+from absenteeism_module import *
+55/6: model = absenteeism_model('model','scaler')
+57/1:
+#全てをimportする。通常(全体が見えない場合)はimportしすぎるとconflictしてしまうので好ましくない。
+from absenteeism_module import *
+57/2: model = absenteeism_model('model','scaler')
+57/3: model = absenteeism_model('mymodel','myscaler')
+57/4:
+#全てをimportする。通常(全体が見えない場合)はimportしすぎるとconflictしてしまうので好ましくない。
+from absenteeism_module import *
+57/5: model = absenteeism_model('mymodel','myscaler')
+57/6: model.load_and_clean_data('Absenteeism_new_data.csv')
+57/7:
+#全てをimportする。通常(全体が見えない場合)はimportしすぎるとconflictしてしまうので好ましくない。
+from absenteeism_module import *
+57/8: model = absenteeism_model('model','scaler')
+57/9: model.load_and_clean_data('Absenteeism_new_data.csv')
+59/1:
+#全てをimportする。通常(全体が見えない場合)はimportしすぎるとconflictしてしまうので好ましくない。
+from absenteeism_module import *
+59/2: model = absenteeism_model('mymodel','myscaler')
+60/1:
+import pandas as pd
+import numpy as np
+60/2:
+data_preprocessed = pd.read_csv('Absenteeism_preprocessed.csv')
+data_preprocessed
+60/3:
+#ここで使うのはロジスティック回帰なので二つの分類をする必要がある。ここでは特に多く欠勤した人、そうでない人に分ける。(中央値で分ける)
+data_preprocessed['Absenteeism Time in Hours'].median()
+60/4:
+#中央値以上に休んでいる者を1,ない者を0。whereはexcelで言うとif文。
+targets = np.where(data_preprocessed['Absenteeism Time in Hours'] > data_preprocessed['Absenteeism Time in Hours'].median(),1,0)
+targets
+60/5:
+data_preprocessed['Excessive Absenteeism'] = targets
+data_preprocessed
+60/6:
+#データの数の調整はする必要があるか→今回は半々なのでなさそう
+targets.sum()/targets.shape[0]
+60/7:
+#ほとんど影響のないデータを消す場合ここに追記する。['Absenteeism Time in Hours'],→['Absenteeism Time in Hours','Reason_1'],
+data_with_targets = data_preprocessed.drop(['Absenteeism Time in Hours'],axis= 1)
+data_with_targets
+60/8:
+#入力でーた(ターゲットなし)を作成する
+unscaled_inputs = data_with_targets.iloc[:,:-1]
+60/9:
+from sklearn.preprocessing import StandardScaler
+absenteeism_scaler = StandardScaler()
+60/10: absenteeism_scaler.fit(unscaled_inputs)
+60/11:
+#fitするだけでは演算が行われただけ。実際にデータを置き換えるにはtransformを用いる。
+scaled_inputs = absenteeism_scaler.transform(unscaled_inputs)
+scaled_inputs
+60/12:
+#テストデータ、訓練用の分割
+from sklearn.model_selection import train_test_split
+train_test_split(scaled_inputs,targets)
+60/13: x_train,x_test,y_train,y_test = train_test_split(scaled_inputs,targets,train_size = 0.8,random_state = 20)
+60/14: print(x_train.shape,y_train.shape)
+60/15:
+#モデルの実装、最後に予測の正確性
+from sklearn.linear_model import LogisticRegression
+reg=  LogisticRegression()
+reg.fit(x_train,y_train)
+reg.score(x_train,y_train)
+60/16:
+#手作業で計算しても結果は同じ
+model_outputs = reg.predict(x_train)
+np.sum((model_outputs == y_train))/model_outputs.shape[0]
+60/17:
+#scaled_inputsはdf型ではなくndarray型。なので一旦valuesを変数に格納
+feature_name=unscaled_inputs.columns.values
+60/18:
+summary_table = pd.DataFrame(columns=['Feature name'],data=feature_name)
+summary_table['Coefficient']=np.transpose(reg.coef_)
+summary_table
+60/19:
+#coefficientは値のインパクトの大きさ。odds比はある二つのことのない人とある人でどれくらい違うかを示す。
+summary_table.index = summary_table.index + 1
+summary_table.loc[0] = ['Intercept',reg.intercept_[0]]
+summary_table = summary_table.sort_index()
+summary_table['Odds_ratio'] = np.exp(summary_table.Coefficient)
+summary_table
+60/20:
+#odds比の順番に並び替えた方がわかりやすい。1から遠ければその理由は欠勤の大きな理由となっているし1ならその理由とはなり得ない。
+summary_table.sort_values('Odds_ratio',ascending=False)
+60/21:
+#標準化は指定した部分のみで行う。
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.preprocessing import StandardScaler
+
+class CustomScaler(BaseEstimator,TransformerMixin):
+    def __init__(self,columns):
+        self.scaler = StandardScaler()
+        self.columns = columns
+        self.mean_ = None
+        self.var_ = None
+    
+    def fit(self, X, y=None):
+        self.scaler.fit(X[self.columns],y)
+        self.mean_ = np.mean(X[self.columns])
+        self.var_ = np.var(X[self.columns])
+        return self
+    
+    def transform(self, X, y=None, copy=None):
+        init_col_order= X.columns
+        X_scaled = pd.DataFrame(self.scaler.transform(X[self.columns]),columns=self.columns)
+        X_not_scaled = X.loc[:,~X.columns.isin(self.columns)]
+        return pd.concat([X_not_scaled, X_scaled],axis = 1)[init_col_order]
+60/22: unscaled_inputs.columns.values
+60/23:
+columns_to_scale=['Month Value',
+       'Day of the Week', 'Transportation Expense', 'Distance to Work',
+       'Age', 'Daily Work Load Average', 'Body Mass Index', 'Education',
+       'Children', 'Pets']
+60/24: absenteeism_scaler=CustomScaler(columns_to_scale)
+60/25: absenteeism_scaler.fit(unscaled_inputs)
+60/26:
+scaled_inputs = absenteeism_scaler.transform(unscaled_inputs)
+scaled_inputs
+60/27: reg.score(x_test, y_test)
+60/28:
+#左が欠勤しない確率、右が欠勤する確率
+reg.predict_proba(x_test)
+60/29:
+#データを機械語で保存するライブラリ
+import pickle
+with open('mymodel','wb') as file:
+    pickle.dump(reg, file)
+60/30:
+with open('myscaler','wb')as file:
+    pickle.dump(absenteeism_scaler, file)
+61/1:
+#全てをimportする。通常(全体が見えない場合)はimportしすぎるとconflictしてしまうので好ましくない。
+from absenteeism_module import *
+61/2: model = absenteeism_model('mymodel','myscaler')
+62/1:
+import pandas as pd
+import numpy as np
+62/2:
+data_preprocessed = pd.read_csv('Absenteeism_preprocessed.csv')
+data_preprocessed
+62/3:
+#ここで使うのはロジスティック回帰なので二つの分類をする必要がある。ここでは特に多く欠勤した人、そうでない人に分ける。(中央値で分ける)
+data_preprocessed['Absenteeism Time in Hours'].median()
+62/4:
+#中央値以上に休んでいる者を1,ない者を0。whereはexcelで言うとif文。
+targets = np.where(data_preprocessed['Absenteeism Time in Hours'] > data_preprocessed['Absenteeism Time in Hours'].median(),1,0)
+targets
+62/5:
+data_preprocessed['Excessive Absenteeism'] = targets
+data_preprocessed
+62/6:
+#データの数の調整はする必要があるか→今回は半々なのでなさそう
+targets.sum()/targets.shape[0]
+62/7:
+#ほとんど影響のないデータを消す場合ここに追記する。['Absenteeism Time in Hours'],→['Absenteeism Time in Hours','Reason_1'],
+data_with_targets = data_preprocessed.drop(['Absenteeism Time in Hours'],axis= 1)
+data_with_targets
+62/8:
+#入力でーた(ターゲットなし)を作成する
+unscaled_inputs = data_with_targets.iloc[:,:-1]
+62/9:
+from sklearn.preprocessing import StandardScaler
+absenteeism_scaler = StandardScaler()
+62/10: absenteeism_scaler.fit(unscaled_inputs)
+62/11:
+#fitするだけでは演算が行われただけ。実際にデータを置き換えるにはtransformを用いる。
+scaled_inputs = absenteeism_scaler.transform(unscaled_inputs)
+scaled_inputs
+62/12:
+#テストデータ、訓練用の分割
+from sklearn.model_selection import train_test_split
+train_test_split(scaled_inputs,targets)
+62/13: x_train,x_test,y_train,y_test = train_test_split(scaled_inputs,targets,train_size = 0.8,random_state = 20)
+62/14: print(x_train.shape,y_train.shape)
+62/15:
+#モデルの実装、最後に予測の正確性
+from sklearn.linear_model import LogisticRegression
+reg=  LogisticRegression()
+reg.fit(x_train,y_train)
+reg.score(x_train,y_train)
+62/16:
+#手作業で計算しても結果は同じ
+model_outputs = reg.predict(x_train)
+np.sum((model_outputs == y_train))/model_outputs.shape[0]
+62/17:
+#scaled_inputsはdf型ではなくndarray型。なので一旦valuesを変数に格納
+feature_name=unscaled_inputs.columns.values
+62/18:
+summary_table = pd.DataFrame(columns=['Feature name'],data=feature_name)
+summary_table['Coefficient']=np.transpose(reg.coef_)
+summary_table
+62/19:
+#coefficientは値のインパクトの大きさ。odds比はある二つのことのない人とある人でどれくらい違うかを示す。
+summary_table.index = summary_table.index + 1
+summary_table.loc[0] = ['Intercept',reg.intercept_[0]]
+summary_table = summary_table.sort_index()
+summary_table['Odds_ratio'] = np.exp(summary_table.Coefficient)
+summary_table
+62/20:
+#odds比の順番に並び替えた方がわかりやすい。1から遠ければその理由は欠勤の大きな理由となっているし1ならその理由とはなり得ない。
+summary_table.sort_values('Odds_ratio',ascending=False)
+62/21:
+#標準化は指定した部分のみで行う。
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.preprocessing import StandardScaler
+
+class CustomScaler(BaseEstimator,TransformerMixin):
+    def __init__(self,columns):
+        self.scaler = StandardScaler()
+        self.columns = columns
+        self.mean_ = None
+        self.var_ = None
+    
+    def fit(self, X, y=None):
+        self.scaler.fit(X[self.columns],y)
+        self.mean_ = np.mean(X[self.columns])
+        self.var_ = np.var(X[self.columns])
+        return self
+    
+    def transform(self, X, y=None, copy=None):
+        init_col_order= X.columns
+        X_scaled = pd.DataFrame(self.scaler.transform(X[self.columns]),columns=self.columns)
+        X_not_scaled = X.loc[:,~X.columns.isin(self.columns)]
+        return pd.concat([X_not_scaled, X_scaled],axis = 1)[init_col_order]
+62/22: unscaled_inputs.columns.values
+62/23:
+columns_to_scale=['Month Value',
+       'Day of the Week', 'Transportation Expense', 'Distance to Work',
+       'Age', 'Daily Work Load Average', 'Body Mass Index', 'Education',
+       'Children', 'Pets']
+62/24: absenteeism_scaler=CustomScaler(columns_to_scale)
+62/25: absenteeism_scaler.fit(unscaled_inputs)
+62/26:
+scaled_inputs = absenteeism_scaler.transform(unscaled_inputs)
+scaled_inputs
+62/27: reg.score(x_test, y_test)
+62/28:
+#左が欠勤しない確率、右が欠勤する確率
+reg.predict_proba(x_test)
+62/29:
+#データを機械語で保存するライブラリ
+import pickle
+with open('model','wb') as file:
+    pickle.dump(reg, file)
+62/30:
+with open('scaler','wb')as file:
+    pickle.dump(absenteeism_scaler, file)
+63/1:
+#全てをimportする。通常(全体が見えない場合)はimportしすぎるとconflictしてしまうので好ましくない。
+from absenteeism_module import *
+63/2: model = absenteeism_model('model','scaler')
+63/3: model.load_and_clean_data('Absenteeism_new_data.csv')
+64/1:
+#全てをimportする。通常(全体が見えない場合)はimportしすぎるとconflictしてしまうので好ましくない。
+from absenteeism_module import *
+64/2: model = absenteeism_model('model','scaler')
+64/3: model.load_and_clean_data('Absenteeism_new_data.csv')
+64/4: model.predicted_outputs()
+64/5: model.predicted_outputs().to_csv('Absenteeism_prediction.csv', index = False)
+82/1:
+import pandas as pd
+import csv as csv
+import numpy as np
+import matplotlib.pyplot as plt
+82/2:
+train_df =  pd.read_csv('train.csv')
+test_df = pd.read_csv('test.csv')
+82/3: train_df
+82/4: train_df.columns.values
+82/5: train_df.info()
+82/6: train_df.describe()
+82/7:
+import seaborn as sns
+g = sns.FacetGrid(train_df, col = 'Survived')
+g.map(plt.hist, 'Age', bins = 10)
+82/8:
+import seaborn as sns
+g = sns.FacetGrid(train_df, col = 'Survived')
+g.map(plt.hist, 'Age', bins = 10)
+82/9: train_df[["SibSp", "Survived"]].groupby(['SibSp'], as_index=False).mean().sort_values(by='Survived', ascending=False)
+82/10:
+#さらに階級ごとに分けた場合
+grid = sns.FacetGrid(train_df, col='Survived', row='Pclass', size=2.2, aspect=1.6)
+grid.map(plt.hist, 'Age', alpha=.5, bins=20)
+grid.add_legend();
+82/11:
+grid = sns.FacetGrid(train_df, row='Embarked', size=2.2, aspect=1.6)
+grid.map(sns.pointplot, 'Pclass', 'Survived', 'Sex', palette='deep')
+grid.add_legend()
+82/12:
+grid = sns.FacetGrid(train_df, row='Embarked', col='Survived', size=2.2, aspect=1.6)
+grid.map(sns.barplot, 'Sex', 'Fare', alpha=.5, ci=None)
+grid.add_legend()
+82/13:
+#上記データの分析をもとに要らん特徴量をなくしていく。(計算量を減らし解析を楽にするため。)
+combine = [train_df, test_df]
+combine
+82/14: train_df.describe(include = ['0'])
+82/15: train_df.describe(include = ['O'])
+82/16:
+#上記データの分析をもとに要らん特徴量をなくしていく。(計算量を減らし解析を楽にするため。)
+#ここではstrかつ重複が見られるticket, cabinを削除
+train_df = train_df.drop(['Ticket','Cabin'], axis= 1)
+test_df = test_df.drop(['Ticket','Cabin'], axis= 1)
+combine = [train_df, test_df]
+82/17:
+#さらに精度を高めるための特徴量の追加(名前の最初の部分抜き出し)
+for dataset in combine:
+    dataset['Title'] = dataset.Name.str.extract(' ([A-Za-z]+)\.', expand=False)
+
+pd.crosstab(train_df['Title'], train_df['Sex'])
+82/18:
+for dataset in combine:
+    dataset['Title'] = dataset['Title'].replace(['Lady', 'Countess','Capt', 'Col',\
+    'Don', 'Dr', 'Major', 'Rev', 'Sir', 'Jonkheer', 'Dona'], 'Rare')
+
+    dataset['Title'] = dataset['Title'].replace('Mlle', 'Miss')
+    dataset['Title'] = dataset['Title'].replace('Ms', 'Miss')
+    dataset['Title'] = dataset['Title'].replace('Mme', 'Mrs')
+    
+train_df[['Title', 'Survived']].groupby(['Title'], as_index=False).mean()
+82/19:
+title_mapping = {"Mr": 1, "Miss": 2, "Mrs": 3, "Master": 4, "Rare": 5}
+for dataset in combine:
+    dataset['Title'] = dataset['Title'].map(title_mapping)
+    dataset['Title'] = dataset['Title'].fillna(0)
+#カテゴリ変数なので数値に置き換える
+82/20:
+#もう名前いらないので削除
+train_df = train_df.drop(['Name', 'PassengerId'], axis=1)
+test_df = test_df.drop(['Name'], axis=1)
+combine = [train_df, test_df]
+82/21:
+#性別も数値に置き換える。
+for dataset in combine:
+    dataset['Sex'] = dataset['Sex'].map( {'female': 1, 'male': 0} ).astype(int)
+82/22:
+#null値の補完(平均と標準偏差の間の値をランダムに挿入する例もあるが)
+#(ここでは他の相関する値から値を予測して入れていく。)
+grid = sns.FacetGrid(train_df, row='Pclass', col='Sex', size=2.2, aspect=1.6)
+grid.map(plt.hist, 'Age', alpha=.5, bins=20)
+grid.add_legend()
+82/23:
+guess_ages = np.zeros((2,3))
+for dataset in combine:
+    for i in range(0, 2):
+        for j in range(0, 3):
+            guess_df = dataset[(dataset['Sex'] == i) & \
+                                  (dataset['Pclass'] == j+1)]['Age'].dropna()
+
+            # age_mean = guess_df.mean()
+            # age_std = guess_df.std()
+            # age_guess = rnd.uniform(age_mean - age_std, age_mean + age_std)
+
+            age_guess = guess_df.median()
+
+            # Convert random age float to nearest .5 age
+            guess_ages[i,j] = int( age_guess/0.5 + 0.5 ) * 0.5
+            
+    for i in range(0, 2):
+        for j in range(0, 3):
+            dataset.loc[ (dataset.Age.isnull()) & (dataset.Sex == i) & (dataset.Pclass == j+1),\
+                    'Age'] = guess_ages[i,j]
+
+    dataset['Age'] = dataset['Age'].astype(int)
+82/24:
+#連続変数をバンド化
+for dataset in combine:    
+    dataset.loc[ dataset['Age'] <= 16, 'Age'] = 0
+    dataset.loc[(dataset['Age'] > 16) & (dataset['Age'] <= 32), 'Age'] = 1
+    dataset.loc[(dataset['Age'] > 32) & (dataset['Age'] <= 48), 'Age'] = 2
+    dataset.loc[(dataset['Age'] > 48) & (dataset['Age'] <= 64), 'Age'] = 3
+    dataset.loc[ dataset['Age'] > 64, 'Age'] = 4
+82/25:
+ #sibspとparchは配偶者、子供の有無でまとめられる。
+for dataset in combine:
+    dataset['FamilySize'] = dataset['SibSp'] + dataset['Parch'] + 1
+
+train_df[['FamilySize', 'Survived']].groupby(['FamilySize'], as_index=False).mean().sort_values(by='Survived', ascending=False)
+82/26:
+#実は独身かそうじゃないかでデータが分けられそう
+for dataset in combine:
+    dataset['IsAlone'] = 0
+    dataset.loc[dataset['FamilySize'] == 1, 'IsAlone'] = 1
+
+train_df[['IsAlone', 'Survived']].groupby(['IsAlone'], as_index=False).mean()
+82/27:
+#なのでまとめて削除
+train_df = train_df.drop(['Parch', 'SibSp', 'FamilySize'], axis=1)
+test_df = test_df.drop(['Parch', 'SibSp', 'FamilySize'], axis=1)
+combine = [train_df, test_df]
+
+train_df.head()
+82/28:
+#相関強いデータどうしを掛け合わせるとさらに精度高くなるかも...?
+for dataset in combine:
+    dataset['Age*Class'] = dataset.Age * dataset.Pclass
+82/29:
+#出発地もまとめる。
+for dataset in combine:
+    dataset['Embarked'] = dataset['Embarked'].map( {'S': 0, 'C': 1, 'Q': 2} ).astype(int)
+82/30:
+#出発地もまとめる。
+for dataset in combine:
+    dataset['Embarked'] = dataset['Embarked'].fillna(freq_port)
+for dataset in combine:
+    dataset['Embarked'] = dataset['Embarked'].map( {'S': 0, 'C': 1, 'Q': 2} ).astype(int)
+82/31:
+#出発地もまとめる。
+freq_port = train_df.Embarked.dropna().mode()[0]
+for dataset in combine:
+    dataset['Embarked'] = dataset['Embarked'].fillna(freq_port)
+for dataset in combine:
+    dataset['Embarked'] = dataset['Embarked'].map( {'S': 0, 'C': 1, 'Q': 2} ).astype(int)
+82/32:
+#test_dfはfareが欠損してるので単純に中央値で埋めてあげる。
+test_df['Fare'].fillna(test_df['Fare'].dropna().median(), inplace=True)
+test_df.head()
+82/33:
+train_df['FareBand'] = pd.qcut(train_df['Fare'], 4)
+train_df[['FareBand', 'Survived']].groupby(['FareBand'], as_index=False).mean().sort_values(by='FareBand', ascending=True)
+82/34:
+for dataset in combine:
+    dataset.loc[ dataset['Fare'] <= 7.91, 'Fare'] = 0
+    dataset.loc[(dataset['Fare'] > 7.91) & (dataset['Fare'] <= 14.454), 'Fare'] = 1
+    dataset.loc[(dataset['Fare'] > 14.454) & (dataset['Fare'] <= 31), 'Fare']   = 2
+    dataset.loc[ dataset['Fare'] > 31, 'Fare'] = 3
+    dataset['Fare'] = dataset['Fare'].astype(int)
+
+train_df = train_df.drop(['FareBand'], axis=1)
+combine = [train_df, test_df]
+82/35:
+X_train = train_df.drop("Survived", axis=1)
+Y_train = train_df["Survived"]
+X_test  = test_df.drop("PassengerId", axis=1).copy()
+82/36:
+from sklearn.linear_model import LogisticRegression
+logreg = LogisticRegression()
+logreg.fit(X_train, Y_train)
+Y_pred = logreg.predict(X_test)
+logreg.score(X_train, Y_train)
+82/37:
+#形式に沿ってデータを作成。
+submission = pd.DataFrame({
+        "PassengerId": test_df["PassengerId"],
+        "Survived": Y_pred
+    })
+submission.to_csv('submission.csv', index=False)
+   1: %history -g -f filename
